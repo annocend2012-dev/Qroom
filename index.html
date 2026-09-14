@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Firebase SDK (เชื่อมต่อฐานข้อมูลออนไลน์) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --primary: #4318ff;
@@ -304,6 +308,20 @@
     </main>
 
     <script>
+        // 🚨 นำข้อความ firebaseConfig จากเว็บ Firebase มาวางตรงนี้แทนที่ครับ
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoKhnGQcXx8JDAHSWNygWWhHE8FDqvAQE",
+            authDomain: "qroom-b3a32.firebaseapp.com",
+            projectId: "qroom-b3a32",
+            storageBucket: "qroom-b3a32.firebasestorage.app",
+            messagingSenderId: "132074385246",
+            appId: "1:132074385246:web:359a8e0e544996d7fba9cf"
+        };
+
+        // เริ่มต้นใช้งาน Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const authSection = document.getElementById('authSection');
         const appSection = document.getElementById('appSection');
         const userProfile = document.getElementById('userProfile');
@@ -324,6 +342,7 @@
         const btnClearFilter = document.getElementById('btnClearFilter');
 
         let currentUser = null;
+        let allBookings = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
@@ -343,37 +362,46 @@
             authTitle.innerHTML = '<i class="fa-solid fa-user-plus"></i> สมัครสมาชิก Qroom';
         });
 
-        function getUsers() { return JSON.parse(localStorage.getItem('qroom_users')) || []; }
-
-        registerForm.addEventListener('submit', (e) => {
+        // ระบบสมัครสมาชิกบันทึกลง Firebase
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('regName').value.trim();
             const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value;
 
-            const users = getUsers();
-            if (users.find(u => u.username === username)) {
-                Swal.fire({ icon: 'error', title: 'Username ซ้ำ', text: 'ชื่อผู้ใช้งานนี้ถูกสมัครไปแล้ว' });
-                return;
+            try {
+                const userDoc = await db.collection('users').doc(username).get();
+                if (userDoc.exists) {
+                    Swal.fire({ icon: 'error', title: 'Username ซ้ำ', text: 'ชื่อผู้ใช้งานนี้ถูกสมัครไปแล้ว' });
+                    return;
+                }
+
+                await db.collection('users').doc(username).set({ name, username, password });
+                Swal.fire({ icon: 'success', title: 'สมัครสำเร็จ!', text: 'กรุณาล็อกอินเข้าใช้งาน', timer: 1500 });
+                registerForm.reset();
+                tabLogin.click();
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
             }
-            users.push({ name, username, password });
-            localStorage.setItem('qroom_users', JSON.stringify(users));
-            Swal.fire({ icon: 'success', title: 'สมัครสำเร็จ!', text: 'กรุณาล็อกอินเข้าใช้งาน', timer: 1500 });
-            registerForm.reset();
-            tabLogin.click();
         });
 
-        loginForm.addEventListener('submit', (e) => {
+        // ระบบเข้าสู่ระบบเช็คจาก Firebase
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            const user = getUsers().find(u => u.username === username && u.password === password);
-            if (user) {
-                localStorage.setItem('qroom_session', JSON.stringify(user));
-                checkAuth();
-            } else {
-                Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: 'Username หรือ รหัสผ่านไม่ถูกต้อง' });
+            try {
+                const userDoc = await db.collection('users').doc(username).get();
+                if (userDoc.exists && userDoc.data().password === password) {
+                    const userData = userDoc.data();
+                    localStorage.setItem('qroom_session', JSON.stringify(userData));
+                    checkAuth();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: 'Username หรือ รหัสผ่านไม่ถูกต้อง' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
             }
         });
 
@@ -391,13 +419,25 @@
                 userProfile.classList.remove('hidden');
                 welcomeText.textContent = currentUser.name;
                 document.getElementById('name').value = currentUser.name;
-                displayBookings();
+                listenToBookings(); // ดึงคิวจองแบบ Real-time
             } else {
                 currentUser = null;
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
                 userProfile.classList.add('hidden');
             }
+        }
+
+        // ฟังคิวจองจาก Firebase แบบ Real-time (ใครจองใหม่ หน้าจอจะเด้งทันทีทุกเครื่อง)
+        function listenToBookings() {
+            db.collection('bookings').onSnapshot(snapshot => {
+                allBookings = [];
+                snapshot.forEach(doc => {
+                    allBookings.push({ id: doc.id, ...doc.data() });
+                });
+                allBookings.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
+                displayBookings(filterDateInput.value);
+            });
         }
 
         function setupDateLimits() {
@@ -437,7 +477,7 @@
         });
         btnClearFilter.addEventListener('click', () => { filterDateInput.value = ''; displayBookings(); });
 
-        bookingForm.addEventListener('submit', (e) => {
+        bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const date = document.getElementById('date').value;
             const room = document.getElementById('room').value;
@@ -453,37 +493,38 @@
                 return;
             }
 
-            const newBooking = { id: Date.now(), username: currentUser.username, name: currentUser.name, date, room, startTime, endTime };
-            saveBooking(newBooking);
-            document.getElementById('date').value = ''; document.getElementById('room').value = '';
-            document.getElementById('startTime').value = ''; document.getElementById('endTime').value = '';
-            displayBookings(filterDateInput.value);
-            Swal.fire({ icon: 'success', title: 'จองสำเร็จ!', timer: 1500, showConfirmButton: false });
+            try {
+                await db.collection('bookings').add({
+                    username: currentUser.username,
+                    name: currentUser.name,
+                    date, room, startTime, endTime,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('date').value = ''; document.getElementById('room').value = '';
+                document.getElementById('startTime').value = ''; document.getElementById('endTime').value = '';
+                Swal.fire({ icon: 'success', title: 'จองสำเร็จ!', timer: 1500, showConfirmButton: false });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+            }
         });
 
-        function getBookings() { return JSON.parse(localStorage.getItem('qroom_bookings')) || []; }
-        function saveBooking(b) {
-            const list = getBookings(); list.push(b);
-            list.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
-            localStorage.setItem('qroom_bookings', JSON.stringify(list));
-        }
         function isBookingConflicted(r, d, s, e) {
-            return getBookings().some(b => b.room === r && b.date === d && (s < b.endTime && e > b.startTime));
+            return allBookings.some(b => b.room === r && b.date === d && (s < b.endTime && e > b.startTime));
         }
 
         function deleteBooking(id) {
             Swal.fire({ title: 'ยกเลิกการจอง?', icon: 'warning', showCancelButton: true, confirmButtonText: 'ยกเลิก', cancelButtonText: 'ปิด' })
-            .then((res) => {
+            .then(async (res) => {
                 if (res.isConfirmed) {
-                    let list = getBookings().filter(b => b.id !== id);
-                    localStorage.setItem('qroom_bookings', JSON.stringify(list));
-                    displayBookings(filterDateInput.value);
+                    await db.collection('bookings').doc(id).delete();
+                    Swal.fire({ icon: 'success', title: 'ยกเลิกสำเร็จ', timer: 1200, showConfirmButton: false });
                 }
             });
         }
 
         function displayBookings(filterDate = null) {
-            let list = getBookings();
+            let list = [...allBookings];
             bookingTableBody.innerHTML = '';
             const today = new Date(); today.setHours(0,0,0,0);
             const past30 = new Date(); past30.setDate(today.getDate() - 30); past30.setHours(0,0,0,0);
@@ -504,7 +545,7 @@
 
                 const fDate = bDate.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
                 const canDelete = currentUser.username === b.username;
-                const delBtn = canDelete ? `<button class="btn-delete" onclick="deleteBooking(${b.id})"><i class="fa-solid fa-trash-can"></i></button>` : `<i class="fa-solid fa-lock" style="color:#aaa;"></i>`;
+                const delBtn = canDelete ? `<button class="btn-delete" onclick="deleteBooking('${b.id}')"><i class="fa-solid fa-trash-can"></i></button>` : `<i class="fa-solid fa-lock" style="color:#aaa;"></i>`;
 
                 row.innerHTML = `
                     <td><strong>${fDate}</strong><span class="time-badge">${b.startTime}-${b.endTime}</span></td>
