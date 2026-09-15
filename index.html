@@ -69,7 +69,7 @@
         .avatar { width: 35px; height: 35px; background: linear-gradient(135deg, var(--primary), #868CFF); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
         /* =========================================
-           🚀 หน้า Landing Page (หน้าเริ่มต้น)
+           🚀 หน้า Landing Page (หน้าเริ่มต้นหลังจาก Login)
            ========================================= */
         .landing-container {
             display: flex;
@@ -123,7 +123,6 @@
         }
 
         /* ---------------------------------------- */
-
         .container { max-width: 1200px; margin: 0 auto; padding: 0 15px 40px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
         .card { border-radius: 20px; overflow: hidden; margin-bottom: 20px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(31, 38, 135, 0.2); }
@@ -214,23 +213,8 @@
         </div>
     </nav>
 
-    <!-- 🌟 1. หน้า Landing Page (เริ่มต้น) -->
-    <main id="landingSection" class="landing-container">
-        <div class="landing-card glass-panel">
-            <i class="fa-solid fa-layer-group landing-icon"></i>
-            <h1 class="landing-title">ยินดีต้อนรับสู่ Qroom</h1>
-            <p class="landing-subtitle">
-                ระบบจัดการและจองห้องอัจฉริยะ จองห้องสมุด<br>
-                และห้องเรียนต่างๆ ได้ง่ายๆ สะดวก รวดเร็ว ตลอด 24 ชั่วโมง
-            </p>
-            <button id="btnEnterSystem" class="btn-submit btn-start">
-                เริ่มต้นจองห้อง <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </div>
-    </main>
-
-    <!-- 🔐 2. หน้า Login & Register (ซ่อนไว้ก่อน) -->
-    <main id="authSection" class="auth-container hidden">
+    <!-- 🔐 1. หน้า Login & Register (แสดงเป็นหน้าแรกสุด) -->
+    <main id="authSection" class="auth-container">
         <div class="card glass-panel auth-card">
             <div class="auth-header">
                 <h2 id="authTitle"><i class="fa-solid fa-fingerprint"></i> เข้าสู่ระบบ Qroom</h2>
@@ -289,7 +273,22 @@
         </div>
     </main>
 
-    <!-- 🏫 3. ระบบจองห้อง (ซ่อนไว้ก่อน) -->
+    <!-- 🌟 2. หน้า Landing Page (หน้าเริ่มต้นเมื่อล็อกอินแล้ว) -->
+    <main id="landingSection" class="landing-container hidden">
+        <div class="landing-card glass-panel">
+            <i class="fa-solid fa-layer-group landing-icon"></i>
+            <h1 class="landing-title">ยินดีต้อนรับสู่ Qroom</h1>
+            <p class="landing-subtitle">
+                สวัสดี <strong id="landingNameText" style="color: var(--primary);">คุณ...</strong><br>
+                ระบบพร้อมใช้งานแล้ว คุณสามารถจองห้องสมุดหรือห้องเรียนต่างๆ<br>ได้ง่ายๆ สะดวก รวดเร็ว
+            </p>
+            <button id="btnEnterSystem" class="btn-submit btn-start">
+                เริ่มต้นจองห้อง <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- 🏫 3. ระบบจองห้อง (เมื่อกดปุ่มเริ่มต้นจากหน้า Landing) -->
     <main id="appSection" class="container hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header">
@@ -377,7 +376,7 @@
     </main>
 
     <script>
-        // 🚨 อย่าลืมใส่ firebaseConfig ของคุณกลับคืนมาตรงนี้นะครับ!
+        // 🚨 อย่าลืมใส่ firebaseConfig ของคุณกลับคืนมาตรงนี้นะครับ
         const firebaseConfig = {
             apiKey: "AIzaSyDoKhnGQcXx8JDAHSWNygWWhHE8FDqvAQE",
             authDomain: "qroom-b3a32.firebaseapp.com",
@@ -391,10 +390,11 @@
         const db = firebase.firestore();
 
         // โครงสร้างหน้าจอหลัก
-        const landingSection = document.getElementById('landingSection');
         const authSection = document.getElementById('authSection');
+        const landingSection = document.getElementById('landingSection');
         const appSection = document.getElementById('appSection');
         const btnEnterSystem = document.getElementById('btnEnterSystem');
+        const landingNameText = document.getElementById('landingNameText');
 
         const userProfile = document.getElementById('userProfile');
         const welcomeText = document.getElementById('welcomeText');
@@ -415,21 +415,24 @@
         let allBookings = [];
 
         document.addEventListener('DOMContentLoaded', () => {
+            checkAuth(); // เช็คสถานะล็อกอินทันทีที่โหลดหน้า
             setupDateLimits();
             generateRoomOptions();
         });
 
-        // 🌟 เมื่อกดปุ่ม เริ่มต้นจองห้อง ที่หน้าแรก
+        // 🌟 กดปุ่ม "เริ่มต้นจองห้อง" จากหน้า Landing
         btnEnterSystem.addEventListener('click', () => {
             landingSection.classList.add('hidden'); // ซ่อนหน้าแรก
-            checkAuth(); // เช็คว่าเคยล็อกอินไหม ถ้าเคยไปหน้าจอง ถ้าไม่ไปหน้า Login
+            appSection.classList.remove('hidden');  // ไปหน้าจองคิว
         });
 
-        // กดโลโก้เพื่อกลับหน้าแรก
+        // กดโลโก้เพื่อกลับหน้า Landing (ถ้าล็อกอินแล้ว)
         function goHome() {
-            authSection.classList.add('hidden');
-            appSection.classList.add('hidden');
-            landingSection.classList.remove('hidden');
+            if (currentUser) {
+                authSection.classList.add('hidden');
+                appSection.classList.add('hidden');
+                landingSection.classList.remove('hidden');
+            }
         }
 
         tabLogin.addEventListener('click', () => {
@@ -475,7 +478,7 @@
                 if (userDoc.exists && userDoc.data().password === password) {
                     const userData = userDoc.data();
                     localStorage.setItem('qroom_session', JSON.stringify(userData));
-                    checkAuth();
+                    checkAuth(); // พอ Login เสร็จจะพาไปหน้า Landing ทันที
                 } else {
                     Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: 'Username หรือ รหัสผ่านไม่ถูกต้อง' });
                 }
@@ -486,25 +489,34 @@
 
         btnLogout.addEventListener('click', () => {
             localStorage.removeItem('qroom_session');
-            authSection.classList.remove('hidden');
-            appSection.classList.add('hidden');
-            userProfile.classList.add('hidden');
+            checkAuth(); // ออกจากระบบจะพากลับไปหน้า Login ทันที
         });
 
+        // หัวใจหลักในการคุมการเปลี่ยนหน้า
         function checkAuth() {
             const session = localStorage.getItem('qroom_session');
             if (session) {
+                // 🔓 ล็อกอินแล้ว -> ไปหน้า Landing Page
                 currentUser = JSON.parse(session);
-                authSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
+                
+                authSection.classList.add('hidden'); // ซ่อน Login
+                appSection.classList.add('hidden'); // ซ่อนจองคิวไว้ก่อน
+                landingSection.classList.remove('hidden'); // โชว์ Landing
+                
                 userProfile.classList.remove('hidden');
                 welcomeText.textContent = currentUser.name;
+                landingNameText.textContent = `คุณ ${currentUser.name}`; // แสดงชื่อที่หน้า Landing
                 document.getElementById('name').value = currentUser.name;
+                
                 listenToBookings();
             } else {
+                // 🔒 ยังไม่ล็อกอิน -> ไปหน้า Login
                 currentUser = null;
-                authSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
+                
+                authSection.classList.remove('hidden'); // โชว์ Login
+                landingSection.classList.add('hidden'); // ซ่อน Landing
+                appSection.classList.add('hidden'); // ซ่อนจองคิว
+                
                 userProfile.classList.add('hidden');
             }
         }
