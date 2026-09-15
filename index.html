@@ -249,7 +249,8 @@
         .img-thumb-preview:hover { transform: scale(1.1); border-color: var(--primary); }
 
         .btn-delete { background: rgba(255, 82, 82, 0.1); color: var(--danger); border: 1px solid rgba(255, 82, 82, 0.3); padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
-        .btn-delete:hover { background: var(--danger); color: white; }
+        .btn-delete:hover:not(:disabled) { background: var(--danger); color: white; }
+        .btn-delete:disabled { opacity: 0.45; cursor: not-allowed; border-color: rgba(0,0,0,0.1); color: var(--text-muted); }
 
         .btn-edit-pass { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-right: 4px; }
         .btn-edit-pass:hover { background: var(--warning); color: white; }
@@ -469,7 +470,7 @@
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h2><i class="fa-solid fa-calendar-day" style="color: var(--primary);"></i> คิวการจองของฉันวันนี้</h2>
-                    <p>ตรวจสอบช่วงเวลาจอง และถ่าย/แนบรูปคืนห้องเมื่อใช้งานเสร็จ</p>
+                    <p>ตรวจสอบช่วงเวลาจอง แนบรูปคืนห้อง หรือยกเลิกการจอง</p>
                 </div>
                 <span id="myTodayDateBadge" class="room-badge" style="font-size: 0.9rem;">กำลังโหลด...</span>
             </div>
@@ -911,6 +912,16 @@
             generateRoomOptions();
         });
 
+        /* ⏱️ ฟังก์ชันตรวจสอบว่าการจองหมดเวลาไปแล้วหรือยัง */
+        function isBookingExpired(dateStr, endTimeStr) {
+            if (!dateStr || !endTimeStr) return false;
+            const now = new Date();
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const [hours, minutes] = endTimeStr.split(':').map(Number);
+            const bookingEnd = new Date(year, month - 1, day, hours, minutes, 0);
+            return now > bookingEnd;
+        }
+
         /* 🍔 ระบบเปิด/ปิด Drawer Menu */
         function openDrawer() {
             sidebarDrawer.classList.add('active');
@@ -1041,6 +1052,7 @@
             myTodayList.forEach(b => {
                 let photoBtnHtml = '';
                 let statusBadge = '';
+                const isExpired = isBookingExpired(b.date, b.endTime);
 
                 if (b.checkoutPhoto) {
                     if (b.checkoutStatus === 'pending') {
@@ -1065,6 +1077,22 @@
                     `;
                 }
 
+                // สร้างปุ่มยกเลิกการจอง
+                let cancelBtnHtml = '';
+                if (!isExpired) {
+                    cancelBtnHtml = `
+                        <button class="btn-delete" style="width:100%; margin-top:8px; padding:10px; font-size:0.85rem;" onclick="deleteBooking('${b.id}')">
+                            <i class="fa-solid fa-trash-can"></i> ยกเลิกการจองคิวนี้
+                        </button>
+                    `;
+                } else {
+                    cancelBtnHtml = `
+                        <button class="btn-delete" style="width:100%; margin-top:8px; padding:10px; font-size:0.85rem;" disabled title="เลยเวลาที่จองไปแล้ว ไม่สามารถยกเลิกได้">
+                            <i class="fa-solid fa-lock"></i> เลยเวลาจองแล้ว (ยกเลิกไม่ได้)
+                        </button>
+                    `;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'room-status-card glass-panel';
                 card.style.background = 'var(--input-bg)';
@@ -1083,6 +1111,7 @@
                     </div>
                     <div>
                         ${photoBtnHtml}
+                        ${cancelBtnHtml}
                     </div>
                 `;
                 grid.appendChild(card);
@@ -1714,7 +1743,13 @@
         });
 
         function deleteBooking(id) {
-            Swal.fire({ title: 'ยกเลิกการจอง?', icon: 'warning', showCancelButton: true, confirmButtonText: 'ยกเลิก', cancelButtonText: 'ปิด' })
+            const targetBooking = allBookings.find(b => b.id === id);
+            if (targetBooking && isBookingExpired(targetBooking.date, targetBooking.endTime)) {
+                Swal.fire({ icon: 'error', title: 'ไม่สามารถยกเลิกได้', text: 'รายการนี้เลยเวลาจองไปแล้ว ไม่สามารถยกเลิกการจองได้' });
+                return;
+            }
+
+            Swal.fire({ title: 'ยกเลิกการจอง?', icon: 'warning', showCancelButton: true, confirmButtonText: 'ยืนยันยกเลิก', cancelButtonText: 'ปิด' })
             .then(async (res) => {
                 if (res.isConfirmed) {
                     await db.collection('bookings').doc(id).delete();
@@ -1725,7 +1760,6 @@
         function displayBookings(filterDate = null) {
             let list = [...allBookings];
             bookingTableBody.innerHTML = '';
-            const today = new Date(); today.setHours(0,0,0,0);
             
             if (filterDate) list = list.filter(b => b.date === filterDate);
 
@@ -1739,14 +1773,22 @@
                 row.classList.add('fade-in-up');
                 row.style.animationDelay = `${index * 0.08}s`;
 
-                const bDate = new Date(b.date); bDate.setHours(0,0,0,0);
-                const isPast = bDate < today;
-                if (isPast) row.classList.add('past-booking');
+                const isExpired = isBookingExpired(b.date, b.endTime);
+                if (isExpired) row.classList.add('past-booking');
 
+                const bDate = new Date(`${b.date}T00:00:00`);
                 const fDate = bDate.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
-                const delBtn = (currentUser.username === b.username || currentUser.role === 'admin') 
-                    ? `<button class="btn-delete" onclick="deleteBooking('${b.id}')"><i class="fa-solid fa-trash-can"></i></button>` 
-                    : `<i class="fa-solid fa-lock" style="color:#aaa;"></i>`;
+                
+                let delBtn = '';
+                if (currentUser.username === b.username || currentUser.role === 'admin') {
+                    if (!isExpired) {
+                        delBtn = `<button class="btn-delete" onclick="deleteBooking('${b.id}')" title="ยกเลิกการจอง"><i class="fa-solid fa-trash-can"></i></button>`;
+                    } else {
+                        delBtn = `<button class="btn-delete" disabled title="เลยเวลาจองแล้ว ไม่สามารถยกเลิกได้"><i class="fa-solid fa-lock"></i></button>`;
+                    }
+                } else {
+                    delBtn = `<i class="fa-solid fa-lock" style="color:#aaa;"></i>`;
+                }
 
                 let photoCol = '-';
                 if (currentUser.username === b.username || currentUser.role === 'admin') {
@@ -1768,7 +1810,7 @@
                     <td><span class="room-badge">${b.room}</span></td>
                     <td><strong>${b.name}</strong></td>
                     <td>${photoCol}</td>
-                    <td>${isPast ? '<span class="status-badge-done">ผ่านไปแล้ว</span>' : ''}${delBtn}</td>
+                    <td>${isExpired ? '<span class="status-badge-done">ผ่านไปแล้ว</span>' : ''}${delBtn}</td>
                 `;
                 bookingTableBody.appendChild(row);
             });
