@@ -158,11 +158,6 @@
             <button id="btnAdminNav" class="btn-filter-secondary hidden">
                 <i class="fa-solid fa-user-shield"></i> จัดการระบบ
             </button>
-            
-            <!-- ปุ่มเปลี่ยนรหัสผ่านส่วนตัว -->
-            <button id="btnMyPassword" class="btn-filter-secondary" title="เปลี่ยนรหัสผ่านของคุณ">
-                <i class="fa-solid fa-key"></i> เปลี่ยนรหัสผ่าน
-            </button>
 
             <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
             <span id="welcomeText" style="font-size: 0.9rem; margin-right: 5px;">ยินดีต้อนรับ</span>
@@ -395,7 +390,6 @@
         
         const btnEnterSystem = document.getElementById('btnEnterSystem');
         const btnAdminNav = document.getElementById('btnAdminNav');
-        const btnMyPassword = document.getElementById('btnMyPassword');
         const landingNameText = document.getElementById('landingNameText');
 
         const userProfile = document.getElementById('userProfile');
@@ -443,46 +437,6 @@
                 landingSection.classList.remove('hidden');
             }
         }
-
-        // 🔑 เปลี่ยนรหัสผ่านของตนเอง
-        btnMyPassword.addEventListener('click', async () => {
-            if (!currentUser) return;
-
-            const { value: newPassword } = await Swal.fire({
-                title: 'เปลี่ยนรหัสผ่านของคุณ',
-                text: `บัญชีผู้ใช้: ${currentUser.name} (${currentUser.username})`,
-                input: 'password',
-                inputLabel: 'ตั้งรหัสผ่านใหม่',
-                inputPlaceholder: 'กรอกรหัสผ่านใหม่ที่นี่',
-                showCancelButton: true,
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก',
-                inputValidator: (val) => {
-                    if (!val) return 'กรุณากรอกรหัสผ่านใหม่!';
-                }
-            });
-
-            if (newPassword) {
-                try {
-                    await db.collection('users').doc(currentUser.username).update({
-                        password: newPassword
-                    });
-                    
-                    currentUser.password = newPassword;
-                    localStorage.setItem('qroom_session', JSON.stringify(currentUser));
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'เปลี่ยนรหัสผ่านสำเร็จ!',
-                        text: 'รหัสผ่านใหม่ของคุณถูกบันทึกเรียบร้อยแล้ว',
-                        timer: 1800,
-                        showConfirmButton: false
-                    });
-                } catch (err) {
-                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
-                }
-            }
-        });
 
         // 🔐 เข้าสู่ระบบ
         loginForm.addEventListener('submit', async (e) => {
