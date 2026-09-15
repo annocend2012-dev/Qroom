@@ -301,6 +301,9 @@
             <li id="menuApp" onclick="goToPage('app')">
                 <i class="fa-solid fa-calendar-plus"></i> <span>ระบบจองคิวห้อง</span>
             </li>
+            <li id="menuStats" onclick="goToPage('stats')">
+                <i class="fa-solid fa-chart-pie"></i> <span>สถิติการจองรายสัปดาห์</span>
+            </li>
             <li id="menuProfile" onclick="goToPage('profile')">
                 <i class="fa-solid fa-user-gear"></i> <span>จัดการโปรไฟล์ตัวเอง</span>
             </li>
@@ -366,7 +369,7 @@
         </div>
     </main>
 
-    <!-- 🏠 1. หน้าหลัก (Home Dashboard ภาพรวมระบบ) -->
+    <!-- 🏠 1. หน้าหลัก (Home Dashboard) -->
     <main id="homeSection" class="page-container hidden">
         <div class="home-welcome-card glass-panel">
             <h1 class="home-title">ยินดีต้อนรับ, <span id="homeNameText" style="color: var(--primary);">คุณ...</span></h1>
@@ -558,7 +561,131 @@
         </section>
     </main>
 
-    <!-- 👤 4. หน้าตั้งค่าโปรไฟล์ส่วนตัว -->
+    <!-- 📈 4. หน้าสถิติการจองรายสัปดาห์ (Weekly Booking Statistics) -->
+    <main id="statsSection" class="page-container hidden">
+        <div class="card glass-panel fade-in-up" style="margin-bottom: 20px;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> สถิติการจองคิวรายสัปดาห์</h2>
+                    <p>สรุปข้อมูลการใช้ห้องและระยะเวลาจองย้อนหลัง/ล่วงหน้ารายสัปดาห์</p>
+                </div>
+                <div id="statsUserBadge" class="room-badge" style="font-size: 0.95rem; padding: 8px 16px;">
+                    <i class="fa-solid fa-user-check"></i> <span id="statsTargetUserName">กำลังโหลด...</span>
+                </div>
+            </div>
+
+            <div style="padding: 20px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; justify-content: space-between;">
+                    
+                    <!-- กล่องค้นหาผู้ใช้สำหรับ Admin -->
+                    <div id="adminUserSearchGroup" class="hidden" style="flex: 1; min-width: 260px;">
+                        <label style="font-weight: 600; margin-bottom: 6px; display: block;">
+                            <i class="fa-solid fa-user-gear" style="color:var(--primary);"></i> เลือก/ค้นหาผู้ใช้งาน (สำหรับ Admin):
+                        </label>
+                        <select id="statsAdminUserSelect" onchange="renderWeeklyStats()" style="padding: 10px 15px;">
+                            <option value="">-- โหลดรายชื่อผู้ใช้... --</option>
+                        </select>
+                    </div>
+
+                    <!-- ปุ่มควบคุมสัปดาห์ -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                        <button type="button" class="btn-filter-secondary" onclick="changeStatsWeek(-1)" title="สัปดาห์ก่อนหน้า">
+                            <i class="fa-solid fa-chevron-left"></i> สัปดาห์ก่อน
+                        </button>
+                        <button type="button" class="btn-filter-primary" onclick="resetStatsWeekToCurrent()">
+                            สัปดาห์นี้
+                        </button>
+                        <button type="button" class="btn-filter-secondary" onclick="changeStatsWeek(1)" title="สัปดาห์ถัดไป">
+                            สัปดาห์ถัดไป <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <input type="date" id="statsWeekPicker" onchange="onStatsDatePickerChange(event)" style="padding: 8px 12px; width: auto;">
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">
+                    <i class="fa-regular fa-calendar-days"></i> ช่วงวันที่: <strong id="statsRangeText" style="color: var(--text-dark);">-</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- การ์ดสรุปตัวเลขสถิติประจำสัปดาห์ -->
+        <div class="stat-grid" style="margin-bottom: 20px;">
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(67, 24, 255, 0.15); color: var(--primary);">
+                    <i class="fa-solid fa-hashtag"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statsWeekTotalCount">0</div>
+                    <div class="stat-label">จำนวนคิวที่จองในสัปดาห์นี้</div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statsWeekTotalHours">0</div>
+                    <div class="stat-label">ชั่วโมงรวมที่จองในสัปดาห์นี้</div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statsWeekTopRoom" style="font-size: 1.15rem;">-</div>
+                    <div class="stat-label">ห้องที่ใช้งานบ่อยที่สุด</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ตารางสรุปรายวันในสัปดาห์ (จันทร์ - อาทิตย์) -->
+        <div class="card glass-panel fade-in-up" style="margin-bottom: 20px;">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-calendar-week"></i> สรุปรายวันในสัปดาห์นี้ (จันทร์ - อาทิตย์)</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>วัน</th>
+                            <th>วันที่</th>
+                            <th>จำนวนคิว</th>
+                            <th>รวมเวลาที่ใช้</th>
+                            <th>รายละเอียดห้อง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsDailyTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ตารางรายการจองทั้งหมดในสัปดาห์นี้ -->
+        <div class="card glass-panel fade-in-up">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-list-ul"></i> รายการจองทั้งหมดในสัปดาห์นี้</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>วัน / วันที่</th>
+                            <th>เวลา</th>
+                            <th>ระยะเวลา</th>
+                            <th>สถานที่ / ห้อง</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsDetailTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- 👤 5. หน้าตั้งค่าโปรไฟล์ส่วนตัว -->
     <main id="profileSection" class="page-container hidden" style="max-width: 600px;">
         <section class="card glass-panel fade-in-up">
             <div class="card-header">
@@ -588,7 +715,7 @@
         </section>
     </main>
 
-    <!-- 🛡️ 5. หน้า Admin -->
+    <!-- 🛡️ 6. หน้า Admin -->
     <main id="adminSection" class="page-container container-2col hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
@@ -686,6 +813,7 @@
         const homeSection = document.getElementById('homeSection');
         const statusSection = document.getElementById('statusSection');
         const appSection = document.getElementById('appSection');
+        const statsSection = document.getElementById('statsSection');
         const profileSection = document.getElementById('profileSection');
         const adminSection = document.getElementById('adminSection');
         
@@ -717,6 +845,7 @@
         let allBookings = [];
         let allUsers = [];
         let currentTabFilter = 'all';
+        let statsCurrentMonday = null; // เก็บวันจันทร์ของสัปดาห์ที่เลือกในหน้าสถิติ
 
         // 🎨 รายการธีมสี
         const themes = {
@@ -766,6 +895,10 @@
             } else if (pageName === 'app') {
                 appSection.classList.remove('hidden');
                 document.getElementById('menuApp').classList.add('active');
+            } else if (pageName === 'stats') {
+                statsSection.classList.remove('hidden');
+                document.getElementById('menuStats').classList.add('active');
+                initStatsPage();
             } else if (pageName === 'profile') {
                 profileSection.classList.remove('hidden');
                 document.getElementById('menuProfile').classList.add('active');
@@ -820,6 +953,7 @@
             homeSection.classList.add('hidden');
             statusSection.classList.add('hidden');
             appSection.classList.add('hidden');
+            statsSection.classList.add('hidden');
             profileSection.classList.add('hidden');
             adminSection.classList.add('hidden');
         }
@@ -848,7 +982,6 @@
             document.getElementById('statBusyRooms').textContent = busyCount;
             document.getElementById('statTodayBookings').textContent = todayBookings.length;
 
-            // แสดงคิวล่าสุด 5 รายการในหน้าหลัก
             const recentList = document.getElementById('homeRecentBookings');
             if (recentList) {
                 recentList.innerHTML = '';
@@ -941,6 +1074,205 @@
             roomSelect.value = roomName;
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('date').value = todayStr;
+        }
+
+        /* 📈 ================= ระบบคำนวณสถิติการจองรายสัปดาห์ ================= */
+        
+        function getMondayOfDate(d) {
+            const date = new Date(d);
+            const day = date.getDay(); // 0 คือ อาทิตย์, 1 คือ จันทร์
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(date.setDate(diff));
+            monday.setHours(0,0,0,0);
+            return monday;
+        }
+
+        function calculateHours(startTime, endTime) {
+            if (!startTime || !endTime) return 0;
+            const [sH, sM] = startTime.split(':').map(Number);
+            const [eH, eM] = endTime.split(':').map(Number);
+            const diffMin = (eH * 60 + eM) - (sH * 60 + sM);
+            return diffMin > 0 ? diffMin / 60 : 0;
+        }
+
+        function initStatsPage() {
+            if (!statsCurrentMonday) {
+                statsCurrentMonday = getMondayOfDate(new Date());
+            }
+
+            const adminSearchGroup = document.getElementById('adminUserSearchGroup');
+            if (currentUser && currentUser.role === 'admin') {
+                adminSearchGroup.classList.remove('hidden');
+                populateStatsUserSelect();
+            } else {
+                adminSearchGroup.classList.add('hidden');
+            }
+
+            renderWeeklyStats();
+        }
+
+        function populateStatsUserSelect() {
+            const select = document.getElementById('statsAdminUserSelect');
+            if (!select) return;
+            
+            const currentSelected = select.value || currentUser.username;
+            select.innerHTML = '';
+
+            if (allUsers.length === 0) {
+                select.innerHTML = `<option value="${currentUser.username}">${currentUser.name} (@${currentUser.username})</option>`;
+                return;
+            }
+
+            allUsers.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.username;
+                opt.textContent = `${u.name} (@${u.username}) - [${u.role === 'admin' ? 'Admin' : 'User'}]`;
+                if (u.username === currentSelected) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function changeStatsWeek(offset) {
+            statsCurrentMonday.setDate(statsCurrentMonday.getDate() + (offset * 7));
+            renderWeeklyStats();
+        }
+
+        function resetStatsWeekToCurrent() {
+            statsCurrentMonday = getMondayOfDate(new Date());
+            renderWeeklyStats();
+        }
+
+        function onStatsDatePickerChange(e) {
+            if (e.target.value) {
+                statsCurrentMonday = getMondayOfDate(new Date(e.target.value));
+                renderWeeklyStats();
+            }
+        }
+
+        function renderWeeklyStats() {
+            if (!statsCurrentMonday) return;
+
+            // กำหนดเป้าหมาย Username ที่ต้องการดู
+            let targetUsername = currentUser.username;
+            if (currentUser.role === 'admin') {
+                const adminSel = document.getElementById('statsAdminUserSelect');
+                if (adminSel && adminSel.value) {
+                    targetUsername = adminSel.value;
+                }
+            }
+
+            // ดึงชื่อผู้ใช้เป้าหมายมาโชว์
+            const targetUserObj = allUsers.find(u => u.username === targetUsername) || (currentUser.username === targetUsername ? currentUser : { name: targetUsername, username: targetUsername });
+            document.getElementById('statsTargetUserName').textContent = `${targetUserObj.name} (@${targetUsername})`;
+
+            // คำนวณวันอาทิตย์ (สิ้นสุดสัปดาห์)
+            const sunday = new Date(statsCurrentMonday);
+            sunday.setDate(sunday.getDate() + 6);
+            sunday.setHours(23, 59, 59, 999);
+
+            // แสดงข้อความช่วงวันที่
+            const dateFmt = { day: 'numeric', month: 'short', year: 'numeric' };
+            const rangeStr = `${statsCurrentMonday.toLocaleDateString('th-TH', dateFmt)} - ${sunday.toLocaleDateString('th-TH', dateFmt)}`;
+            document.getElementById('statsRangeText').textContent = rangeStr;
+
+            // ตั้งค่าวันที่บน Date Picker ให้ตรงกับวันจันทร์
+            const mondayYMD = `${statsCurrentMonday.getFullYear()}-${String(statsCurrentMonday.getMonth()+1).padStart(2,'0')}-${String(statsCurrentMonday.getDate()).padStart(2,'0')}`;
+            document.getElementById('statsWeekPicker').value = mondayYMD;
+
+            // กรองดึงรายการจองของผู้ใช้นี้ในสัปดาห์นี้
+            const weekBookings = allBookings.filter(b => {
+                if (b.username !== targetUsername) return false;
+                const bDate = new Date(`${b.date}T00:00:00`);
+                return bDate >= statsCurrentMonday && bDate <= sunday;
+            });
+
+            // คำนวณสรุปยอดสถิติ
+            let totalHours = 0;
+            const roomFrequency = {};
+            weekBookings.forEach(b => {
+                const hrs = calculateHours(b.startTime, b.endTime);
+                totalHours += hrs;
+                roomFrequency[b.room] = (roomFrequency[b.room] || 0) + 1;
+            });
+
+            let topRoom = '-';
+            let maxCount = 0;
+            for (const [rName, count] of Object.entries(roomFrequency)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topRoom = rName;
+                }
+            }
+
+            // แสดงผลการ์ดสถิติ
+            document.getElementById('statsWeekTotalCount').textContent = weekBookings.length;
+            document.getElementById('statsWeekTotalHours').textContent = totalHours.toFixed(1).replace('.0', '') + ' ชม.';
+            document.getElementById('statsWeekTopRoom').textContent = topRoom;
+
+            // สร้างตารางสรุปรายวัน (จันทร์ - อาทิตย์)
+            const dayNames = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
+            const dailyTbody = document.getElementById('statsDailyTableBody');
+            dailyTbody.innerHTML = '';
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(statsCurrentMonday);
+                dayDate.setDate(dayDate.getDate() + i);
+                
+                const yyyy = dayDate.getFullYear();
+                const mm = String(dayDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(dayDate.getDate()).padStart(2, '0');
+                const dayDateStr = `${yyyy}-${mm}-${dd}`;
+
+                const dayBookings = weekBookings.filter(b => b.date === dayDateStr);
+                let dayHoursSum = 0;
+                const dayRooms = [];
+
+                dayBookings.forEach(b => {
+                    dayHoursSum += calculateHours(b.startTime, b.endTime);
+                    dayRooms.push(`${b.room} (${b.startTime}-${b.endTime})`);
+                });
+
+                const formattedDayDate = dayDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${dayNames[i]}</strong></td>
+                    <td>${formattedDayDate}</td>
+                    <td>${dayBookings.length > 0 ? `<span class="room-badge">${dayBookings.length} คิว</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+                    <td>${dayHoursSum > 0 ? `<strong>${dayHoursSum.toFixed(1).replace('.0', '')} ชม.</strong>` : '-'}</td>
+                    <td style="font-size:0.85rem; color:var(--text-muted);">${dayRooms.length > 0 ? dayRooms.join(', ') : 'ไม่มีการจอง'}</td>
+                `;
+                dailyTbody.appendChild(tr);
+            }
+
+            // สร้างตารางรายการจองทั้งหมดในสัปดาห์
+            const detailTbody = document.getElementById('statsDetailTableBody');
+            detailTbody.innerHTML = '';
+
+            if (weekBookings.length === 0) {
+                detailTbody.innerHTML = `<tr><td colspan="5" class="no-data"><i class="fa-solid fa-folder-open"></i> ไม่พบประวัติการจองคิวในสัปดาห์นี้</td></tr>`;
+            } else {
+                const today0 = new Date(); today0.setHours(0,0,0,0);
+                
+                weekBookings.forEach(b => {
+                    const bDate = new Date(`${b.date}T00:00:00`);
+                    const isPast = bDate < today0;
+                    const fDate = bDate.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
+                    const hrs = calculateHours(b.startTime, b.endTime);
+
+                    const tr = document.createElement('tr');
+                    if (isPast) tr.classList.add('past-booking');
+
+                    tr.innerHTML = `
+                        <td><strong>${fDate}</strong></td>
+                        <td>${b.startTime} - ${b.endTime} น.</td>
+                        <td><strong>${hrs.toFixed(1).replace('.0', '')} ชม.</strong></td>
+                        <td><span class="room-badge">${b.room}</span></td>
+                        <td>${isPast ? '<span class="status-badge-done">ผ่านไปแล้ว</span>' : '<span class="status-pill free" style="font-size:0.75rem;"><i class="fa-solid fa-clock"></i> ล่วงหน้า</span>'}</td>
+                    `;
+                    detailTbody.appendChild(tr);
+                });
+            }
         }
 
         // 👤 บันทึกโปรไฟล์ส่วนตัว
@@ -1043,6 +1375,9 @@
                 displayBookings(filterDateInput.value);
                 renderHomeDashboard();
                 renderRoomDashboard();
+                if (currentUser && document.getElementById('statsSection') && !document.getElementById('statsSection').classList.contains('hidden')) {
+                    renderWeeklyStats();
+                }
             });
         }
 
@@ -1163,6 +1498,7 @@
                 allUsers = [];
                 snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data() }));
                 displayUsers();
+                populateStatsUserSelect();
             });
         }
 
