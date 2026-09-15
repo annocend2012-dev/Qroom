@@ -149,14 +149,26 @@
         }
         .btn-drawer-logout:hover { background: var(--danger); color: white; }
 
-        /* Landing Page & Dashboard */
-        .landing-container { display: flex; flex-direction: column; align-items: center; min-height: 75vh; padding: 10px 15px 50px; max-width: 1200px; margin: 0 auto; animation: fadeSwitch 0.5s ease-out forwards; }
-        .landing-header { text-align: center; margin-bottom: 25px; width: 100%; }
-        .landing-title { font-size: 2.2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; }
-        .landing-subtitle { font-size: 1rem; color: var(--text-muted); }
+        /* Main Container Global */
+        .page-container { max-width: 1200px; margin: 0 auto; padding: 0 15px 50px; animation: fadeSwitch 0.4s ease-out forwards; }
+        
+        /* 🏠 1. หน้าหลัก (Home Dashboard) Styles */
+        .home-welcome-card { padding: 35px 30px; border-radius: 24px; margin-bottom: 25px; text-align: left; }
+        .home-title { font-size: 2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; }
+        .home-subtitle { font-size: 1rem; color: var(--text-muted); }
 
-        /* Room Status Dashboard */
-        .room-dashboard { width: 100%; border-radius: 24px; padding: 25px; margin-top: 10px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 25px; }
+        .stat-card { padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 18px; background: var(--input-bg); border: 1px solid var(--card-border); }
+        .stat-icon-box { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .stat-info .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-dark); line-height: 1.1; }
+        .stat-info .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+        .quick-actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .action-banner-card { padding: 25px; border-radius: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 15px; }
+        .action-banner-title { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+
+        /* 📊 2. หน้าสถานะการใช้ห้อง (Room Status) Styles */
+        .room-dashboard { width: 100%; border-radius: 24px; padding: 25px; }
         .dashboard-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .dashboard-title { font-size: 1.2rem; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         
@@ -165,14 +177,8 @@
         .tab-btn.active, .tab-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
         .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; margin-top: 15px; }
-        
-        .room-status-card {
-            border-radius: 16px; padding: 18px; background: var(--input-bg);
-            border: 1px solid var(--card-border); transition: all 0.3s ease;
-            display: flex; flex-direction: column; justify-content: space-between; position: relative;
-        }
+        .room-status-card { border-radius: 16px; padding: 18px; background: var(--input-bg); border: 1px solid var(--card-border); transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
         .room-status-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-        
         .room-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .room-name { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); }
         .room-group-tag { font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; margin-top: 2px; display: inline-block; }
@@ -188,9 +194,9 @@
         .btn-quick-book { width: 100%; padding: 8px; border-radius: 10px; border: none; background: rgba(67, 24, 255, 0.1); color: var(--primary); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .btn-quick-book:hover { background: var(--primary); color: white; }
 
-        /* Layout Main Section */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 15px 40px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
-        .card { border-radius: 20px; overflow: hidden; margin-bottom: 20px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+        /* 🏫 Layout จองห้อง & Admin Forms */
+        .container-2col { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        .card { border-radius: 20px; overflow: hidden; margin-bottom: 20px; }
         .card-header { padding: 20px; border-bottom: 1px solid var(--card-border); }
         .card-header h2 { font-size: 1.2rem; color: var(--text-dark); }
         .card-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
@@ -206,8 +212,7 @@
         input, select { 
             width: 100%; padding: 12px 15px 12px 42px; 
             border: 2px solid var(--card-border); border-radius: 12px; font-size: 0.9rem; 
-            outline: none; background: var(--input-bg); color: var(--text-dark); 
-            transition: all 0.3s; 
+            outline: none; background: var(--input-bg); color: var(--text-dark); transition: all 0.3s; 
         }
         input:focus, select:focus { background: var(--card-bg); border-color: var(--primary); }
 
@@ -246,7 +251,7 @@
         .auth-header { padding: 30px 20px 10px; text-align: center; }
         .auth-header h2 { color: var(--primary); margin-bottom: 10px; font-size: 1.5rem; }
         .admin-note { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; background: var(--input-bg); padding: 10px; border-radius: 8px; }
-        .no-data { text-align: center; padding: 40px !important; color: var(--text-muted); }
+        .no-data { text-align: center; padding: 30px !important; color: var(--text-muted); }
 
         /* ตัวเลือกธีม */
         .theme-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 15px; margin-top: 10px; }
@@ -257,7 +262,7 @@
         .swal-edit-form label { font-size: 0.85rem; font-weight: 600; color: #333; display: block; text-align: left; margin-top: 10px; }
         .swal-edit-form input, .swal-edit-form select { margin: 5px 0 10px 0 !important; width: 100% !important; box-sizing: border-box; }
 
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .filter-bar { flex-direction: column; align-items: stretch; } }
+        @media (max-width: 900px) { .container-2col { grid-template-columns: 1fr; } .filter-bar { flex-direction: column; align-items: stretch; } }
 
         #loginForm, .fade-in-up { animation: fadeSwitch 0.4s ease-out forwards; }
         @keyframes fadeSwitch { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -287,11 +292,14 @@
         </div>
 
         <ul class="drawer-menu">
-            <li id="menuLanding" onclick="goToPage('landing')">
-                <i class="fa-solid fa-house"></i> <span>หน้าหลัก (สถานะห้อง)</span>
+            <li id="menuHome" onclick="goToPage('home')">
+                <i class="fa-solid fa-house"></i> <span>หน้าหลัก (Dashboard)</span>
+            </li>
+            <li id="menuStatus" onclick="goToPage('status')">
+                <i class="fa-solid fa-clock-rotate-left"></i> <span>สถานะการใช้ห้อง</span>
             </li>
             <li id="menuApp" onclick="goToPage('app')">
-                <i class="fa-solid fa-calendar-plus"></i> <span>หน้าจองคิวห้อง</span>
+                <i class="fa-solid fa-calendar-plus"></i> <span>ระบบจองคิวห้อง</span>
             </li>
             <li id="menuProfile" onclick="goToPage('profile')">
                 <i class="fa-solid fa-user-gear"></i> <span>จัดการโปรไฟล์ตัวเอง</span>
@@ -314,7 +322,7 @@
             <button class="btn-menu-toggle hidden" id="btnMenuToggle" onclick="openDrawer()" title="เปิดเมนู">
                 <i class="fa-solid fa-bars"></i>
             </button>
-            <div class="nav-brand" onclick="goToPage('landing')" title="กลับหน้าแรก">
+            <div class="nav-brand" onclick="goToPage('home')" title="กลับหน้าแรก">
                 <i class="fa-solid fa-building-columns"></i> 
                 <span>Qroom</span>
             </div>
@@ -326,7 +334,7 @@
         </div>
     </nav>
 
-    <!-- 🔐 1. หน้า Login -->
+    <!-- 🔐 0. หน้า Login -->
     <main id="authSection" class="auth-container">
         <div class="card glass-panel auth-card">
             <div class="auth-header">
@@ -358,18 +366,95 @@
         </div>
     </main>
 
-    <!-- 🌟 2. หน้า Landing Page + Real-time Room Status Dashboard -->
-    <main id="landingSection" class="landing-container hidden">
-        <div class="landing-header">
-            <h1 class="landing-title">ยินดีต้อนรับ, <span id="landingNameText" style="color: var(--primary);">คุณ...</span></h1>
-            <p class="landing-subtitle">ตรวจสอบสถานะห้องว่างและคิวการใช้งาน ณ เวลาปัจจุบันได้ทันที</p>
+    <!-- 🏠 1. หน้าหลัก (Home Dashboard ภาพรวมระบบ) -->
+    <main id="homeSection" class="page-container hidden">
+        <div class="home-welcome-card glass-panel">
+            <h1 class="home-title">ยินดีต้อนรับ, <span id="homeNameText" style="color: var(--primary);">คุณ...</span></h1>
+            <p class="home-subtitle">ระบบจองห้องอัจฉริยะ พร้อมสรุปข้อมูลภาพรวมการใช้งานประจำวัน</p>
         </div>
 
+        <!-- Stat Cards -->
+        <div class="stat-grid">
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(67, 24, 255, 0.15); color: var(--primary);">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statTotalRooms">0</div>
+                    <div class="stat-label">ห้องทั้งหมดในระบบ</div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(16, 185, 129, 0.15); color: var(--success);">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statFreeRooms">0</div>
+                    <div class="stat-label">ห้องที่ว่างขณะนี้</div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(255, 82, 82, 0.15); color: var(--danger);">
+                    <i class="fa-solid fa-user-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statBusyRooms">0</div>
+                    <div class="stat-label">กำลังใช้งานขณะนี้</div>
+                </div>
+            </div>
+
+            <div class="stat-card glass-panel">
+                <div class="stat-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" id="statTodayBookings">0</div>
+                    <div class="stat-label">การจองรวมวันนี้</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Banner -->
+        <div class="quick-actions-grid">
+            <div class="action-banner-card glass-panel" style="background: linear-gradient(135deg, rgba(67, 24, 255, 0.15), rgba(134, 140, 255, 0.15));">
+                <div class="action-banner-title" style="color: var(--primary);">
+                    <i class="fa-solid fa-calendar-plus"></i> จองห้องใช้งาน
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">เลือกสถานที่ วันเวลา และสร้างคิวการจองห้องใหม่ได้ทันที</p>
+                <button class="btn-submit" onclick="goToPage('app')">
+                    ไปยังหน้าจองคิว <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="action-banner-card glass-panel" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.15));">
+                <div class="action-banner-title" style="color: var(--success);">
+                    <i class="fa-solid fa-clock-rotate-left"></i> เช็กสถานะห้อง Real-time
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">ตรวจสอบว่าห้องไหนว่าง หรือมีใครใช้อยู่ ณ เวลาปัจจุบัน</p>
+                <button class="btn-submit btn-success" onclick="goToPage('status')">
+                    ไปยังหน้าสถานะห้อง <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card glass-panel">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-list-check"></i> รายการจองล่าสุดวันนี้</h2>
+            </div>
+            <div style="padding: 15px 20px;" id="homeRecentBookings"></div>
+        </div>
+    </main>
+
+    <!-- 📊 2. หน้าสถานะการใช้ห้อง (Room Status Dashboard) -->
+    <main id="statusSection" class="page-container hidden">
         <section class="room-dashboard glass-panel">
             <div class="dashboard-top">
                 <div class="dashboard-title">
                     <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i>
-                    <span>สถานะห้องทั้งหมดวันนี้</span>
+                    <span>สถานะการใช้งานห้องประจำวันนี้</span>
                 </div>
                 
                 <div class="room-tabs" id="roomTabs">
@@ -386,8 +471,8 @@
         </section>
     </main>
 
-    <!-- 🏫 3. หน้าระบบจองห้อง -->
-    <main id="appSection" class="container hidden">
+    <!-- 🏫 3. หน้าระบบจองคิวห้อง -->
+    <main id="appSection" class="page-container container-2col hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header">
                 <h2><i class="fa-solid fa-rocket"></i> สร้างการจองใหม่</h2>
@@ -474,7 +559,7 @@
     </main>
 
     <!-- 👤 4. หน้าตั้งค่าโปรไฟล์ส่วนตัว -->
-    <main id="profileSection" class="container hidden" style="grid-template-columns: 1fr; max-width: 600px;">
+    <main id="profileSection" class="page-container hidden" style="max-width: 600px;">
         <section class="card glass-panel fade-in-up">
             <div class="card-header">
                 <h2><i class="fa-solid fa-id-card"></i> ตั้งค่าข้อมูลส่วนตัว</h2>
@@ -504,7 +589,7 @@
     </main>
 
     <!-- 🛡️ 5. หน้า Admin -->
-    <main id="adminSection" class="container hidden">
+    <main id="adminSection" class="page-container container-2col hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
                 <h2><i class="fa-solid fa-user-plus" style="color: var(--success);"></i> เพิ่มผู้ใช้งานใหม่ (เฉพาะ Admin)</h2>
@@ -585,7 +670,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Master Rooms Data
+        // Master Rooms Data Structure
         const masterRooms = [
             { group: 'หอสมุด', name: 'ห้องโครงงาน (หอสมุด)' },
             { group: 'หอสมุด', name: 'ห้องเวทีใหญ่ (หอสมุด)' }
@@ -598,7 +683,8 @@
 
         // Section Elements
         const authSection = document.getElementById('authSection');
-        const landingSection = document.getElementById('landingSection');
+        const homeSection = document.getElementById('homeSection');
+        const statusSection = document.getElementById('statusSection');
         const appSection = document.getElementById('appSection');
         const profileSection = document.getElementById('profileSection');
         const adminSection = document.getElementById('adminSection');
@@ -609,14 +695,14 @@
         const btnMenuToggle = document.getElementById('btnMenuToggle');
         const menuAdmin = document.getElementById('menuAdmin');
         
-        // User Profile Text
+        // User Info Displays
         const userProfile = document.getElementById('userProfile');
         const welcomeText = document.getElementById('welcomeText');
-        const landingNameText = document.getElementById('landingNameText');
+        const homeNameText = document.getElementById('homeNameText');
         const drawerUserName = document.getElementById('drawerUserName');
         const drawerUserRole = document.getElementById('drawerUserRole');
 
-        // Forms & Bodies
+        // Forms & Elements
         const loginForm = document.getElementById('loginForm');
         const bookingForm = document.getElementById('bookingForm');
         const bookingTableBody = document.getElementById('bookingTableBody');
@@ -651,7 +737,7 @@
             generateRoomOptions();
         });
 
-        /* 🍔 ระบบเปิด/ปิด แถบเมนูด้านข้าง (Drawer) */
+        /* 🍔 ระบบเปิด/ปิด Drawer Menu */
         function openDrawer() {
             sidebarDrawer.classList.add('active');
             drawerOverlay.classList.add('active');
@@ -667,12 +753,15 @@
             closeDrawer();
             hideAllSections();
 
-            // ลบสถานะ Active เดิม
             document.querySelectorAll('.drawer-menu li').forEach(li => li.classList.remove('active'));
 
-            if (pageName === 'landing') {
-                landingSection.classList.remove('hidden');
-                document.getElementById('menuLanding').classList.add('active');
+            if (pageName === 'home') {
+                homeSection.classList.remove('hidden');
+                document.getElementById('menuHome').classList.add('active');
+                renderHomeDashboard();
+            } else if (pageName === 'status') {
+                statusSection.classList.remove('hidden');
+                document.getElementById('menuStatus').classList.add('active');
                 renderRoomDashboard();
             } else if (pageName === 'app') {
                 appSection.classList.remove('hidden');
@@ -687,7 +776,7 @@
                     adminSection.classList.remove('hidden');
                     document.getElementById('menuAdmin').classList.add('active');
                 } else {
-                    goToPage('landing');
+                    goToPage('home');
                 }
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -728,115 +817,61 @@
 
         function hideAllSections() {
             authSection.classList.add('hidden');
-            landingSection.classList.add('hidden');
+            homeSection.classList.add('hidden');
+            statusSection.classList.add('hidden');
             appSection.classList.add('hidden');
             profileSection.classList.add('hidden');
             adminSection.classList.add('hidden');
         }
 
-        // 👤 บันทึกโปรไฟล์ส่วนตัว
-        profileSettingForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newName = document.getElementById('profileName').value.trim();
-            const newTheme = document.getElementById('profileTheme').value;
+        // 🏠 คำนวณสรุปข้อมูลสถิติหน้าหลัก (Home Page)
+        function renderHomeDashboard() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            const currentTimeStr = now.toTimeString().slice(0, 5);
 
-            try {
-                await db.collection('users').doc(currentUser.username).update({
-                    name: newName,
-                    theme: newTheme
-                });
-                
-                currentUser.name = newName;
-                currentUser.theme = newTheme;
-                localStorage.setItem('qroom_session', JSON.stringify(currentUser));
+            const todayBookings = allBookings.filter(b => b.date === todayStr);
 
-                welcomeText.textContent = currentUser.name;
-                landingNameText.textContent = currentUser.name;
-                drawerUserName.textContent = currentUser.name;
-                if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
-                
-                applyThemeStyle(currentUser.theme);
-
-                Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', timer: 1500, showConfirmButton: false });
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
-            }
-        });
-
-        // 🔐 เข้าสู่ระบบ
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                const userDoc = await db.collection('users').doc(username).get();
-                if (userDoc.exists && userDoc.data().password === password) {
-                    const userData = userDoc.data();
-                    localStorage.setItem('qroom_session', JSON.stringify(userData));
-                    checkAuth();
-                } else {
-                    Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: 'Username หรือ รหัสผ่านไม่ถูกต้อง' });
-                }
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
-            }
-        });
-
-        function logout() {
-            closeDrawer();
-            localStorage.removeItem('qroom_session');
-            applyThemeStyle('default');
-            checkAuth();
-        }
-
-        function checkAuth() {
-            const session = localStorage.getItem('qroom_session');
-            if (session) {
-                currentUser = JSON.parse(session);
-                
-                btnMenuToggle.classList.remove('hidden');
-                userProfile.classList.remove('hidden');
-                
-                welcomeText.textContent = currentUser.name;
-                landingNameText.textContent = currentUser.name;
-                drawerUserName.textContent = currentUser.name;
-                drawerUserRole.textContent = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ (Admin)' : 'ผู้ใช้งานทั่วไป (User)';
-                if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
-                
-                applyThemeStyle(currentUser.theme || 'default');
-                
-                if (currentUser.role === 'admin') {
-                    menuAdmin.classList.remove('hidden');
-                    listenToUsers();
-                } else {
-                    menuAdmin.classList.add('hidden');
-                }
-                
-                listenToBookings();
-                goToPage('landing');
-            } else {
-                currentUser = null;
-                btnMenuToggle.classList.add('hidden');
-                userProfile.classList.add('hidden');
-                hideAllSections();
-                authSection.classList.remove('hidden');
-            }
-        }
-
-        // 🏫 ดึงข้อมูลการจองและคำนวณสถานะ Real-time
-        function listenToBookings() {
-            db.collection('bookings').onSnapshot(snapshot => {
-                allBookings = [];
-                snapshot.forEach(doc => { allBookings.push({ id: doc.id, ...doc.data() }); });
-                allBookings.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
-                
-                displayBookings(filterDateInput.value);
-                renderRoomDashboard();
+            let busyCount = 0;
+            masterRooms.forEach(room => {
+                const isBusy = todayBookings.some(b => b.room === room.name && b.startTime <= currentTimeStr && currentTimeStr < b.endTime);
+                if (isBusy) busyCount++;
             });
+
+            const freeCount = masterRooms.length - busyCount;
+
+            document.getElementById('statTotalRooms').textContent = masterRooms.length;
+            document.getElementById('statFreeRooms').textContent = freeCount;
+            document.getElementById('statBusyRooms').textContent = busyCount;
+            document.getElementById('statTodayBookings').textContent = todayBookings.length;
+
+            // แสดงคิวล่าสุด 5 รายการในหน้าหลัก
+            const recentList = document.getElementById('homeRecentBookings');
+            if (recentList) {
+                recentList.innerHTML = '';
+                if (todayBookings.length === 0) {
+                    recentList.innerHTML = `<div class="no-data"><i class="fa-solid fa-folder-open"></i> วันนี้ยังไม่มีรายการจองห้อง</div>`;
+                } else {
+                    todayBookings.slice(0, 5).forEach(b => {
+                        const item = document.createElement('div');
+                        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--card-border);";
+                        item.innerHTML = `
+                            <div>
+                                <strong style="color:var(--text-dark);">${b.room}</strong>
+                                <div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;"><i class="fa-regular fa-user"></i> ${b.name}</div>
+                            </div>
+                            <span class="room-badge"><i class="fa-regular fa-clock"></i> ${b.startTime} - ${b.endTime} น.</span>
+                        `;
+                        recentList.appendChild(item);
+                    });
+                }
+            }
         }
 
-        // 🖥️ ฟังก์ชันแสดงสถานะห้องบน Landing Page
+        // 📊 คำนวณการ์ดแสดงสถานะห้องรายห้อง (Status Page)
         function renderRoomDashboard() {
             if (!roomStatusGrid) return;
             roomStatusGrid.innerHTML = '';
@@ -901,13 +936,114 @@
             renderRoomDashboard();
         }
 
-        // ⚡ ฟังก์ชัน Quick Book วาร์ปไปเลือกห้องทันที
         function quickBook(roomName) {
             goToPage('app');
             roomSelect.value = roomName;
-            
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('date').value = todayStr;
+        }
+
+        // 👤 บันทึกโปรไฟล์ส่วนตัว
+        profileSettingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('profileName').value.trim();
+            const newTheme = document.getElementById('profileTheme').value;
+
+            try {
+                await db.collection('users').doc(currentUser.username).update({
+                    name: newName,
+                    theme: newTheme
+                });
+                
+                currentUser.name = newName;
+                currentUser.theme = newTheme;
+                localStorage.setItem('qroom_session', JSON.stringify(currentUser));
+
+                welcomeText.textContent = currentUser.name;
+                homeNameText.textContent = currentUser.name;
+                drawerUserName.textContent = currentUser.name;
+                if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
+                
+                applyThemeStyle(currentUser.theme);
+
+                Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', timer: 1500, showConfirmButton: false });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+            }
+        });
+
+        // 🔐 เข้าสู่ระบบ
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const userDoc = await db.collection('users').doc(username).get();
+                if (userDoc.exists && userDoc.data().password === password) {
+                    const userData = userDoc.data();
+                    localStorage.setItem('qroom_session', JSON.stringify(userData));
+                    checkAuth();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: 'Username หรือ รหัสผ่านไม่ถูกต้อง' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+            }
+        });
+
+        function logout() {
+            closeDrawer();
+            localStorage.removeItem('qroom_session');
+            applyThemeStyle('default');
+            checkAuth();
+        }
+
+        function checkAuth() {
+            const session = localStorage.getItem('qroom_session');
+            if (session) {
+                currentUser = JSON.parse(session);
+                
+                btnMenuToggle.classList.remove('hidden');
+                userProfile.classList.remove('hidden');
+                
+                welcomeText.textContent = currentUser.name;
+                homeNameText.textContent = currentUser.name;
+                drawerUserName.textContent = currentUser.name;
+                drawerUserRole.textContent = currentUser.role === 'admin' ? 'ผู้ดูแลระบบ (Admin)' : 'ผู้ใช้งานทั่วไป (User)';
+                if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
+                
+                applyThemeStyle(currentUser.theme || 'default');
+                
+                if (currentUser.role === 'admin') {
+                    menuAdmin.classList.remove('hidden');
+                    listenToUsers();
+                } else {
+                    menuAdmin.classList.add('hidden');
+                }
+                
+                listenToBookings();
+                goToPage('home');
+            } else {
+                currentUser = null;
+                btnMenuToggle.classList.add('hidden');
+                userProfile.classList.add('hidden');
+                hideAllSections();
+                authSection.classList.remove('hidden');
+            }
+        }
+
+        // 🏫 ดึงข้อมูลการจอง
+        function listenToBookings() {
+            db.collection('bookings').onSnapshot(snapshot => {
+                allBookings = [];
+                snapshot.forEach(doc => { allBookings.push({ id: doc.id, ...doc.data() }); });
+                allBookings.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
+                
+                displayBookings(filterDateInput.value);
+                renderHomeDashboard();
+                renderRoomDashboard();
+            });
         }
 
         function setupDateLimits() {
