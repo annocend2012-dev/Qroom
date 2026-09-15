@@ -135,6 +135,60 @@
             .container { grid-template-columns: 1fr; }
             .filter-bar { flex-direction: column; align-items: stretch; }
         }
+
+        /* =========================================
+           ✨ แอนิเมชันและเอฟเฟกต์เพิ่มเติม (Animations)
+           ========================================= */
+
+        /* เอฟเฟกต์สลับหน้าแบบนุ่มนวล */
+        #loginForm, #registerForm {
+            animation: fadeSwitch 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeSwitch {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* เอฟเฟกต์โฮเวอร์ (Hover) สำหรับการ์ดและปุ่ม */
+        .card {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(31, 38, 135, 0.2);
+        }
+
+        .btn-submit {
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(67, 24, 255, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+            box-shadow: 0 5px 10px rgba(67, 24, 255, 0.3);
+        }
+
+        /* แอนิเมชันสำหรับโหลดข้อมูลในตาราง */
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ทำให้ช่อง Input โฟกัสแล้วดูสมูท */
+        input, select {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
     </style>
 </head>
 <body>
@@ -537,8 +591,14 @@
                 return;
             }
 
-            list.forEach(b => {
+            // ✨ ปรับปรุงแอนิเมชันให้ตารางเด้งทีละบรรทัด (Staggered Animation)
+            list.forEach((b, index) => {
                 const row = document.createElement('tr');
+                
+                // เพิ่มคลาสแอนิเมชันและเวลาหน่วง (Delay)
+                row.classList.add('fade-in-up');
+                row.style.animationDelay = `${index * 0.08}s`;
+
                 const bDate = new Date(b.date); bDate.setHours(0,0,0,0);
                 const isPast = bDate < today;
                 if (isPast) row.classList.add('past-booking');
