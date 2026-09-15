@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Firebase SDK (เอา Storage ออกแล้ว เพราะไม่ใช้รูปภาพ) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -157,7 +157,7 @@
         .btn-logout:hover { background: var(--danger); color: white; }
         .no-data { text-align: center; padding: 40px !important; color: var(--text-muted); }
 
-        /* ตัวเลือกธีมใหม่ (รองรับสีพื้น และ Dark Mode) */
+        /* ตัวเลือกธีม */
         .theme-selector { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); 
@@ -172,6 +172,10 @@
         }
         .theme-option:hover { transform: scale(1.1); }
         .theme-option.active { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.3); }
+
+        /* ตกแต่ง SweetAlert2 Form แก้ไขผู้ใช้ */
+        .swal-edit-form label { font-size: 0.85rem; font-weight: 600; color: #333; display: block; text-align: left; margin-top: 10px; }
+        .swal-edit-form input, .swal-edit-form select { margin: 5px 0 10px 0 !important; width: 100% !important; box-sizing: border-box; }
 
         @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .filter-bar { flex-direction: column; align-items: stretch; } }
 
@@ -340,7 +344,7 @@
         </section>
     </main>
 
-    <!-- 👤 4. หน้าตั้งค่าโปรไฟล์ส่วนตัว (ลบอัปโหลดรูปออก เหลือแต่ธีมและชื่อ) -->
+    <!-- 👤 4. หน้าตั้งค่าโปรไฟล์ส่วนตัว -->
     <main id="profileSection" class="container hidden" style="grid-template-columns: 1fr; max-width: 600px;">
         <section class="card glass-panel fade-in-up">
             <div class="card-header">
@@ -359,9 +363,7 @@
                 
                 <div class="form-group">
                     <label>เลือกธีมสี</label>
-                    <div class="theme-selector" id="themeSelector">
-                        <!-- ปุ่มสีต่างๆ จะถูกสร้างผ่าน JavaScript -->
-                    </div>
+                    <div class="theme-selector" id="themeSelector"></div>
                     <input type="hidden" id="profileTheme">
                 </div>
 
@@ -372,7 +374,7 @@
         </section>
     </main>
 
-    <!-- 🛡️ 5. หน้า Admin (จัดการผู้ใช้ และเปลี่ยนรหัสผ่าน) -->
+    <!-- 🛡️ 5. หน้า Admin (จัดการผู้ใช้แบบครบวงจร) -->
     <main id="adminSection" class="container hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
@@ -423,7 +425,7 @@
         <section class="card glass-panel fade-in-up" style="animation-delay: 0.1s;">
             <div class="card-header">
                 <h2><i class="fa-solid fa-users-gear"></i> จัดการผู้ใช้งานในระบบ</h2>
-                <p>ดูรายชื่อ กดเปลี่ยนรหัสผ่านให้คนอื่น และลบบัญชีผู้ใช้ได้ทันที</p>
+                <p>แก้ไข Username, ชื่อ, สิทธิ์ (Role), รหัสผ่าน หรือลบบัญชีผู้ใช้</p>
             </div>
             <div class="table-responsive">
                 <table>
@@ -486,7 +488,7 @@
         let allBookings = [];
         let allUsers = [];
 
-        // 🎨 รายการธีมสีแบบใหม่ (มีขาว/ดำ และสีอื่นๆ)
+        // 🎨 รายการธีมสี
         const themes = {
             'default': { bg: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', text: '#1b2559', textMuted: '#68769f', cardBg: 'rgba(255, 255, 255, 0.7)', border: 'rgba(255, 255, 255, 0.5)', inputBg: 'rgba(255, 255, 255, 0.5)', btnColor: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
             'white': { bg: '#f3f4f6', text: '#1f2937', textMuted: '#6b7280', cardBg: '#ffffff', border: '#e5e7eb', inputBg: '#f9fafb', btnColor: '#ffffff' },
@@ -505,14 +507,13 @@
             generateRoomOptions();
         });
 
-        // 🎨 ฟังก์ชันจัดการ ธีม
         function setupThemeSelector() {
             const container = document.getElementById('themeSelector');
             for (const [key, themeData] of Object.entries(themes)) {
                 const btn = document.createElement('div');
                 btn.className = 'theme-option';
-                btn.style.background = themeData.btnColor; // สีที่จะโชว์บนปุ่มให้เลือก
-                if (key === 'white') btn.style.border = '2px solid #ccc'; // เพิ่มขอบให้สีขาว
+                btn.style.background = themeData.btnColor;
+                if (key === 'white') btn.style.border = '2px solid #ccc';
                 
                 btn.dataset.theme = key;
                 btn.title = `ธีม ${key}`;
@@ -527,8 +528,6 @@
             if(selected) selected.classList.add('active');
             
             document.getElementById('profileTheme').value = themeKey;
-            
-            // พรีวิวธีมทันที
             applyThemeStyle(themeKey);
         }
 
@@ -544,7 +543,6 @@
             root.style.setProperty('--input-bg', theme.inputBg);
         }
 
-        // 🔄 ระบบนำทาง
         function hideAllSections() {
             authSection.classList.add('hidden');
             landingSection.classList.add('hidden');
@@ -574,35 +572,31 @@
             hideAllSections();
             profileSection.classList.remove('hidden');
             
-            // นำข้อมูลปัจจุบันมาแสดงในฟอร์ม
             document.getElementById('profileName').value = currentUser.name || '';
             selectThemeOption(currentUser.theme || 'default');
         });
 
-        // 👤 อัปเดตโปรไฟล์ส่วนตัว (เฉพาะชื่อและธีม)
+        // 👤 อัปเดตโปรไฟล์ส่วนตัว
         profileSettingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newName = document.getElementById('profileName').value.trim();
             const newTheme = document.getElementById('profileTheme').value;
 
             try {
-                // บันทึกข้อมูลเข้า Firestore
                 await db.collection('users').doc(currentUser.username).update({
                     name: newName,
                     theme: newTheme
                 });
                 
-                // อัปเดต Session ภายในระบบ
                 currentUser.name = newName;
                 currentUser.theme = newTheme;
                 localStorage.setItem('qroom_session', JSON.stringify(currentUser));
 
-                // อัปเดตการแสดงผลหน้าเว็บ
                 welcomeText.textContent = currentUser.name;
                 landingNameText.textContent = `คุณ ${currentUser.name}`;
                 if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
                 
-                applyThemeStyle(currentUser.theme); // เซ็ตธีมให้แน่นอนอีกครั้ง
+                applyThemeStyle(currentUser.theme);
 
                 Swal.fire({
                     icon: 'success',
@@ -639,7 +633,7 @@
 
         btnLogout.addEventListener('click', () => {
             localStorage.removeItem('qroom_session');
-            applyThemeStyle('default'); // กลับไปธีมเดิม
+            applyThemeStyle('default');
             checkAuth();
         });
 
@@ -656,7 +650,6 @@
                 landingNameText.textContent = `คุณ ${currentUser.name}`;
                 if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
                 
-                // ใช้การตั้งค่าธีมส่วนตัว
                 applyThemeStyle(currentUser.theme || 'default');
                 
                 if (currentUser.role === 'admin') {
@@ -797,7 +790,7 @@
             });
         }
 
-        // 🛡️ ดึงข้อมูลและจัดการผู้ใช้งาน ( Admin Only )
+        // 🛡️ ดึงข้อมูลผู้ใช้งาน ( Admin Only )
         function listenToUsers() {
             if (currentUser?.role !== 'admin') return;
             db.collection('users').onSnapshot(snapshot => {
@@ -820,7 +813,9 @@
                     ? `<span class="room-badge" style="color: #ea580c; background: #ffedd5;">ผู้ดูแลระบบ (Admin)</span>` 
                     : `<span class="room-badge" style="color: #2563eb; background: #dbeafe;">ผู้ใช้งาน (User)</span>`;
                 
-                const editBtn = `<button class="btn-edit-pass" onclick="resetPassword('${u.username}', '${u.name}')" title="เปลี่ยนรหัสผ่าน"><i class="fa-solid fa-key"></i></button>`;
+                // ปุ่มแก้ไขข้อมูลแบบใหม่ (ส่งค่าไปแก้ไขทั้งหมด)
+                const editBtn = `<button class="btn-edit-pass" onclick="editUser('${u.username}', '${u.name}', '${u.role}', '${u.password}')" title="แก้ไขข้อมูลผู้ใช้"><i class="fa-solid fa-user-pen"></i></button>`;
+                
                 const delBtn = u.username !== currentUser.username 
                     ? `<button class="btn-delete" onclick="deleteUser('${u.username}')" title="ลบผู้ใช้"><i class="fa-solid fa-user-minus"></i></button>` 
                     : `<span class="status-badge-done">คุณเอง</span>`;
@@ -835,32 +830,127 @@
             });
         }
 
-        // 🔑 เปลี่ยนรหัสผ่านให้คนอื่นโดยแอดมิน
-        async function resetPassword(username, name) {
+        // 🛠️ ฟังก์ชันใหม่: แก้ไขข้อมูลผู้ใช้ทั้งหมด (Username, ชื่อ, บทบาท, รหัสผ่าน)
+        async function editUser(oldUsername, oldName, oldRole, oldPassword) {
             if (currentUser.role !== 'admin') return;
 
-            const { value: newPassword } = await Swal.fire({
-                title: `เปลี่ยนรหัสผ่าน`,
-                text: `สำหรับผู้ใช้: ${name} (${username})`,
-                input: 'password',
-                inputLabel: 'ตั้งรหัสผ่านใหม่',
-                inputPlaceholder: 'กรอกรหัสผ่านใหม่ที่นี่',
+            const { value: formValues } = await Swal.fire({
+                title: `✏️ แก้ไขข้อมูลผู้ใช้`,
+                html: `
+                    <div class="swal-edit-form">
+                        <label>Username</label>
+                        <input id="swal-username" class="swal2-input" value="${oldUsername}" placeholder="Username">
+                        
+                        <label>ชื่อ-นามสกุล (ที่ใช้แสดงผล)</label>
+                        <input id="swal-name" class="swal2-input" value="${oldName}" placeholder="ชื่อ-นามสกุล">
+                        
+                        <label>บทบาท (Role)</label>
+                        <select id="swal-role" class="swal2-select">
+                            <option value="user" ${oldRole === 'user' ? 'selected' : ''}>ผู้ใช้งานทั่วไป (User)</option>
+                            <option value="admin" ${oldRole === 'admin' ? 'selected' : ''}>ผู้ดูแลระบบ (Admin)</option>
+                        </select>
+
+                        <label>รหัสผ่าน (Password)</label>
+                        <input id="swal-password" type="text" class="swal2-input" value="${oldPassword}" placeholder="รหัสผ่าน">
+                    </div>
+                `,
+                focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: 'บันทึกรหัสผ่านใหม่',
+                confirmButtonText: 'บันทึกการแก้ไข',
                 cancelButtonText: 'ยกเลิก',
-                inputValidator: (value) => {
-                    if (!value) return 'กรุณากรอกรหัสผ่านใหม่ก่อนบันทึก!';
+                preConfirm: () => {
+                    const newUsername = document.getElementById('swal-username').value.trim();
+                    const newName = document.getElementById('swal-name').value.trim();
+                    const newRole = document.getElementById('swal-role').value;
+                    const newPassword = document.getElementById('swal-password').value.trim();
+
+                    if (!newUsername || !newName || !newPassword) {
+                        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบทุกช่อง!');
+                        return false;
+                    }
+                    return { newUsername, newName, newRole, newPassword };
                 }
             });
 
-            if (newPassword) {
+            if (formValues) {
+                const { newUsername, newName, newRole, newPassword } = formValues;
+
                 try {
-                    await db.collection('users').doc(username).update({ password: newPassword });
-                    if (username === currentUser.username) {
-                        currentUser.password = newPassword;
-                        localStorage.setItem('qroom_session', JSON.stringify(currentUser));
+                    Swal.showLoading();
+
+                    // กรณีที่ 1: เปลี่ยน Username (ต้องย้าย Document ใน Firestore)
+                    if (newUsername !== oldUsername) {
+                        // เช็คก่อนว่า Username ใหม่ซ้ำกับคนอื่นไหม
+                        const checkDoc = await db.collection('users').doc(newUsername).get();
+                        if (checkDoc.exists) {
+                            Swal.fire({ icon: 'warning', title: 'Username นี้มีผู้ใช้แล้ว', text: 'กรุณาตั้ง Username อื่น' });
+                            return;
+                        }
+
+                        // ดึงข้อมูลเดิม (เช่น ธีม)
+                        const oldDoc = await db.collection('users').doc(oldUsername).get();
+                        const oldData = oldDoc.data() || {};
+
+                        // สร้าง Document ใหม่ภายใต้ Username ใหม่
+                        await db.collection('users').doc(newUsername).set({
+                            ...oldData,
+                            username: newUsername,
+                            name: newName,
+                            role: newRole,
+                            password: newPassword
+                        });
+
+                        // ลบ Document เก่าทิ้ง
+                        await db.collection('users').doc(oldUsername).delete();
+
+                        // อัปเดตรายการจองเดิมของผู้ใช้คนนี้ให้สอดคล้องกัน
+                        const bookingSnaps = await db.collection('bookings').where('username', '==', oldUsername).get();
+                        const batch = db.batch();
+                        bookingSnaps.forEach(doc => {
+                            batch.update(doc.ref, { username: newUsername, name: newName });
+                        });
+                        await batch.commit();
+
+                        // ถ้าแอดมินแก้ไขตัวเอง
+                        if (oldUsername === currentUser.username) {
+                            currentUser.username = newUsername;
+                            currentUser.name = newName;
+                            currentUser.role = newRole;
+                            currentUser.password = newPassword;
+                            localStorage.setItem('qroom_session', JSON.stringify(currentUser));
+                            checkAuth();
+                        }
+
+                    } else {
+                        // กรณีที่ 2: ไม่ได้เปลี่ยน Username แค่อัปเดตฟิลด์อื่นๆ
+                        await db.collection('users').doc(oldUsername).update({
+                            name: newName,
+                            role: newRole,
+                            password: newPassword
+                        });
+
+                        // ถ้าเปลี่ยนชื่อ ให้ตามไปอัปเดตชื่อในตารางจองด้วย
+                        if (newName !== oldName) {
+                            const bookingSnaps = await db.collection('bookings').where('username', '==', oldUsername).get();
+                            const batch = db.batch();
+                            bookingSnaps.forEach(doc => {
+                                batch.update(doc.ref, { name: newName });
+                            });
+                            await batch.commit();
+                        }
+
+                        // ถ้าแอดมินแก้ไขตัวเอง
+                        if (oldUsername === currentUser.username) {
+                            currentUser.name = newName;
+                            currentUser.role = newRole;
+                            currentUser.password = newPassword;
+                            localStorage.setItem('qroom_session', JSON.stringify(currentUser));
+                            checkAuth();
+                        }
                     }
-                    Swal.fire({ icon: 'success', title: 'เปลี่ยนรหัสผ่านเรียบร้อย!', text: `เปลี่ยนรหัสผ่านของ ${username} สำเร็จแล้ว`, timer: 1800, showConfirmButton: false });
+
+                    Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
+
                 } catch (err) {
                     Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
                 }
