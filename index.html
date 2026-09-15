@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* สร้างตัวแปร CSS สำหรับทำระบบธีม */
+        /* ตัวแปร CSS ระบบธีม */
         :root {
             --primary: #4318ff;
             --primary-hover: #3311db;
@@ -22,7 +22,6 @@
             --success: #10b981;
             --warning: #f59e0b;
 
-            /* ค่าเริ่มต้น (จะถูกเปลี่ยนตามธีมที่เลือก) */
             --bg-color: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             --text-dark: #1b2559;
             --text-muted: #68769f;
@@ -82,20 +81,50 @@
             background: linear-gradient(135deg, var(--primary), #868CFF); 
             color: white; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-            border: 2px solid var(--card-border);
+            overflow: hidden; border: 2px solid var(--card-border);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Landing Page */
-        .landing-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 75vh; text-align: center; padding: 20px; animation: fadeSwitch 0.6s ease-out forwards; }
-        .landing-card { padding: 50px 40px; border-radius: 24px; max-width: 600px; width: 100%; }
-        .landing-icon { font-size: 4.5rem; color: var(--primary); margin-bottom: 20px; background: -webkit-linear-gradient(135deg, var(--primary), #868CFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .landing-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; color: var(--text-dark); }
-        .landing-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 35px; line-height: 1.6; }
-        .btn-start { padding: 16px 40px; font-size: 1.2rem; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; width: auto; }
+        /* Landing Page & Dashboard */
+        .landing-container { display: flex; flex-direction: column; align-items: center; min-height: 75vh; padding: 20px 15px 50px; max-width: 1200px; margin: 0 auto; animation: fadeSwitch 0.6s ease-out forwards; }
+        .landing-header { text-align: center; margin-bottom: 30px; width: 100%; }
+        .landing-title { font-size: 2.2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; }
+        .landing-subtitle { font-size: 1rem; color: var(--text-muted); }
 
-        /* Layout Main */
+        /* Room Status Dashboard */
+        .room-dashboard { width: 100%; border-radius: 24px; padding: 25px; margin-top: 15px; }
+        .dashboard-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .dashboard-title { font-size: 1.2rem; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        
+        .room-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tab-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-dark); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .tab-btn.active, .tab-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; margin-top: 15px; }
+        
+        .room-status-card {
+            border-radius: 16px; padding: 18px; background: var(--input-bg);
+            border: 1px solid var(--card-border); transition: all 0.3s ease;
+            display: flex; flex-direction: column; justify-content: space-between; position: relative;
+        }
+        .room-status-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        
+        .room-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .room-name { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); }
+        .room-group-tag { font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; margin-top: 2px; display: inline-block; }
+        
+        .status-pill { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .status-pill.free { background: rgba(16, 185, 129, 0.15); color: #059669; }
+        .status-pill.busy { background: rgba(255, 82, 82, 0.15); color: #dc2626; }
+        .status-pill.reserved { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+
+        .room-card-body { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; min-height: 40px; }
+        .user-info-text { font-weight: 500; color: var(--text-dark); }
+
+        .btn-quick-book { width: 100%; padding: 8px; border-radius: 10px; border: none; background: rgba(67, 24, 255, 0.1); color: var(--primary); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .btn-quick-book:hover { background: var(--primary); color: white; }
+
+        /* Layout Main Section */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 15px 40px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
         .card { border-radius: 20px; overflow: hidden; margin-bottom: 20px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
         .card-header { padding: 20px; border-bottom: 1px solid var(--card-border); }
@@ -158,22 +187,11 @@
         .no-data { text-align: center; padding: 40px !important; color: var(--text-muted); }
 
         /* ตัวเลือกธีม */
-        .theme-selector { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); 
-            gap: 15px; 
-            margin-top: 10px; 
-        }
-        .theme-option { 
-            width: 45px; height: 45px; border-radius: 50%; cursor: pointer; 
-            border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: 0.3s;
-            margin: auto;
-        }
+        .theme-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 15px; margin-top: 10px; }
+        .theme-option { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; margin: auto; }
         .theme-option:hover { transform: scale(1.1); }
         .theme-option.active { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.3); }
 
-        /* ตกแต่ง SweetAlert2 Form แก้ไขผู้ใช้ */
         .swal-edit-form label { font-size: 0.85rem; font-weight: 600; color: #333; display: block; text-align: left; margin-top: 10px; }
         .swal-edit-form input, .swal-edit-form select { margin: 5px 0 10px 0 !important; width: 100% !important; box-sizing: border-box; }
 
@@ -242,19 +260,34 @@
         </div>
     </main>
 
-    <!-- 🌟 2. หน้า Landing Page -->
+    <!-- 🌟 2. หน้า Landing Page + Real-time Room Status Dashboard -->
     <main id="landingSection" class="landing-container hidden">
-        <div class="landing-card glass-panel">
-            <i class="fa-solid fa-layer-group landing-icon"></i>
-            <h1 class="landing-title">ยินดีต้อนรับสู่ Qroom</h1>
-            <p class="landing-subtitle">
-                สวัสดี <strong id="landingNameText" style="color: var(--primary);">คุณ...</strong><br>
-                ระบบพร้อมใช้งานแล้ว คุณสามารถจองห้องสมุดหรือห้องเรียนต่างๆ<br>ได้ง่ายๆ สะดวก รวดเร็ว
-            </p>
-            <button id="btnEnterSystem" class="btn-submit btn-start">
-                เริ่มต้นจองห้อง <i class="fa-solid fa-arrow-right"></i>
-            </button>
+        <div class="landing-header">
+            <h1 class="landing-title">ยินดีต้อนรับ, <span id="landingNameText" style="color: var(--primary);">คุณ...</span></h1>
+            <p class="landing-subtitle">ตรวจสอบสถานะห้องว่างและคิวการใช้งาน ณ เวลาปัจจุบันได้ทันที</p>
         </div>
+
+        <section class="room-dashboard glass-panel">
+            <div class="dashboard-top">
+                <div class="dashboard-title">
+                    <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i>
+                    <span>สถานะห้องทั้งหมดวันนี้</span>
+                </div>
+                
+                <div class="room-tabs" id="roomTabs">
+                    <button class="tab-btn active" onclick="filterRoomCards('all')">ทั้งหมด</button>
+                    <button class="tab-btn" onclick="filterRoomCards('หอสมุด')">หอสมุด</button>
+                    <button class="tab-btn" onclick="filterRoomCards('ชั้น 1')">ชั้น 1</button>
+                    <button class="tab-btn" onclick="filterRoomCards('ชั้น 2')">ชั้น 2</button>
+                    <button class="tab-btn" onclick="filterRoomCards('ชั้น 3')">ชั้น 3</button>
+                    <button class="tab-btn" onclick="filterRoomCards('ชั้น 4')">ชั้น 4</button>
+                </div>
+            </div>
+
+            <div class="room-grid" id="roomStatusGrid">
+                <!-- การ์ดห้องต่างๆ จะถูกเติมผ่าน JavaScript -->
+            </div>
+        </section>
     </main>
 
     <!-- 🏫 3. ระบบจองห้อง -->
@@ -374,7 +407,7 @@
         </section>
     </main>
 
-    <!-- 🛡️ 5. หน้า Admin (จัดการผู้ใช้แบบครบวงจร) -->
+    <!-- 🛡️ 5. หน้า Admin -->
     <main id="adminSection" class="container hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
@@ -456,6 +489,17 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Master Rooms Data Structure (สร้างข้อมูลห้องทั้งหมดเป็นก้อนเดียว)
+        const masterRooms = [
+            { group: 'หอสมุด', name: 'ห้องโครงงาน (หอสมุด)' },
+            { group: 'หอสมุด', name: 'ห้องเวทีใหญ่ (หอสมุด)' }
+        ];
+        for (let floor = 1; floor <= 4; floor++) {
+            for (let r = 2; r <= 8; r++) {
+                masterRooms.push({ group: `ชั้น ${floor}`, name: `ห้อง 3${floor}${r}` });
+            }
+        }
+
         // Section Elements
         const authSection = document.getElementById('authSection');
         const landingSection = document.getElementById('landingSection');
@@ -463,18 +507,15 @@
         const profileSection = document.getElementById('profileSection');
         const adminSection = document.getElementById('adminSection');
         
-        // Buttons
-        const btnEnterSystem = document.getElementById('btnEnterSystem');
+        // Buttons & Nav
         const btnAdminNav = document.getElementById('btnAdminNav');
         const btnProfileNav = document.getElementById('btnProfileNav');
         const btnLogout = document.getElementById('btnLogout');
-        
-        // Display texts
         const landingNameText = document.getElementById('landingNameText');
         const userProfile = document.getElementById('userProfile');
         const welcomeText = document.getElementById('welcomeText');
 
-        // Forms & Inputs
+        // Forms & Elements
         const loginForm = document.getElementById('loginForm');
         const bookingForm = document.getElementById('bookingForm');
         const bookingTableBody = document.getElementById('bookingTableBody');
@@ -483,10 +524,12 @@
         const addUserForm = document.getElementById('addUserForm');
         const userTableBody = document.getElementById('userTableBody');
         const profileSettingForm = document.getElementById('profileSettingForm');
+        const roomStatusGrid = document.getElementById('roomStatusGrid');
 
         let currentUser = null;
         let allBookings = [];
         let allUsers = [];
+        let currentTabFilter = 'all';
 
         // 🎨 รายการธีมสี
         const themes = {
@@ -514,7 +557,6 @@
                 btn.className = 'theme-option';
                 btn.style.background = themeData.btnColor;
                 if (key === 'white') btn.style.border = '2px solid #ccc';
-                
                 btn.dataset.theme = key;
                 btn.title = `ธีม ${key}`;
                 btn.onclick = () => selectThemeOption(key);
@@ -526,7 +568,6 @@
             document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
             const selected = document.querySelector(`.theme-option[data-theme="${themeKey}"]`);
             if(selected) selected.classList.add('active');
-            
             document.getElementById('profileTheme').value = themeKey;
             applyThemeStyle(themeKey);
         }
@@ -534,7 +575,6 @@
         function applyThemeStyle(themeKey) {
             const theme = themes[themeKey] || themes['default'];
             const root = document.documentElement;
-            
             root.style.setProperty('--bg-color', theme.bg);
             root.style.setProperty('--text-dark', theme.text);
             root.style.setProperty('--text-muted', theme.textMuted);
@@ -555,13 +595,9 @@
             if (currentUser) {
                 hideAllSections();
                 landingSection.classList.remove('hidden');
+                renderRoomDashboard(); // อัปเดตการ์ดทุกครั้งที่กลับหน้าแรก
             }
         }
-
-        btnEnterSystem.addEventListener('click', () => {
-            hideAllSections();
-            appSection.classList.remove('hidden'); 
-        });
 
         btnAdminNav.addEventListener('click', () => {
             hideAllSections();
@@ -571,7 +607,6 @@
         btnProfileNav.addEventListener('click', () => {
             hideAllSections();
             profileSection.classList.remove('hidden');
-            
             document.getElementById('profileName').value = currentUser.name || '';
             selectThemeOption(currentUser.theme || 'default');
         });
@@ -593,19 +628,12 @@
                 localStorage.setItem('qroom_session', JSON.stringify(currentUser));
 
                 welcomeText.textContent = currentUser.name;
-                landingNameText.textContent = `คุณ ${currentUser.name}`;
+                landingNameText.textContent = currentUser.name;
                 if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
                 
                 applyThemeStyle(currentUser.theme);
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'บันทึกโปรไฟล์สำเร็จ!',
-                    text: 'ชื่อและธีมสีของคุณถูกอัปเดตเรียบร้อยแล้ว',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
+                Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', timer: 1500, showConfirmButton: false });
             } catch (err) {
                 Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
             }
@@ -647,7 +675,7 @@
                 
                 userProfile.classList.remove('hidden');
                 welcomeText.textContent = currentUser.name;
-                landingNameText.textContent = `คุณ ${currentUser.name}`;
+                landingNameText.textContent = currentUser.name;
                 if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
                 
                 applyThemeStyle(currentUser.theme || 'default');
@@ -668,14 +696,99 @@
             }
         }
 
-        // 🏫 จองห้อง
+        // 🏫 ดึงข้อมูลการจองและคำนวณสถานะ Real-time
         function listenToBookings() {
             db.collection('bookings').onSnapshot(snapshot => {
                 allBookings = [];
                 snapshot.forEach(doc => { allBookings.push({ id: doc.id, ...doc.data() }); });
                 allBookings.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
+                
                 displayBookings(filterDateInput.value);
+                renderRoomDashboard(); // อัปเดตสถานะห้องบนหน้าแรกแบบ Real-time
             });
+        }
+
+        // 🖥️ ฟังก์ชันแสดงสถานะห้องบน Landing Page
+        function renderRoomDashboard() {
+            if (!roomStatusGrid) return;
+            roomStatusGrid.innerHTML = '';
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            const currentTimeStr = now.toTimeString().slice(0, 5); // "HH:MM"
+
+            const filteredRooms = masterRooms.filter(r => currentTabFilter === 'all' || r.group === currentTabFilter);
+
+            filteredRooms.forEach(roomObj => {
+                // ค้นหาคิวการจองวันนี้ของห้องนี้
+                const roomTodayBookings = allBookings.filter(b => b.room === roomObj.name && b.date === todayStr);
+                
+                // 1. เช็คว่ามีคนกำลังใช้อยู่ตอนนี้หรือไม่?
+                const currentBooking = roomTodayBookings.find(b => b.startTime <= currentTimeStr && currentTimeStr < b.endTime);
+                
+                // 2. เช็คว่ามีคิวถัดไปของวันนี้หรือไม่?
+                const upcomingBookings = roomTodayBookings.filter(b => b.startTime > currentTimeStr);
+
+                let statusPill = '';
+                let statusBody = '';
+
+                if (currentBooking) {
+                    statusPill = `<span class="status-pill busy"><i class="fa-solid fa-circle"></i> กำลังใช้งาน</span>`;
+                    statusBody = `<div>โดย <span class="user-info-text">${currentBooking.name}</span></div>
+                                  <div style="font-size: 0.8rem; margin-top:2px;"><i class="fa-regular fa-clock"></i> ${currentBooking.startTime} - ${currentBooking.endTime} น.</div>`;
+                } else if (upcomingBookings.length > 0) {
+                    const nextQueue = upcomingBookings[0];
+                    statusPill = `<span class="status-pill reserved"><i class="fa-solid fa-clock"></i> จองแล้ววันนี้</span>`;
+                    statusBody = `<div>คิวถัดไป: <span class="user-info-text">${nextQueue.startTime} - ${nextQueue.endTime} น.</span></div>
+                                  <div style="font-size: 0.8rem; margin-top:2px;">โดย ${nextQueue.name}</div>`;
+                } else {
+                    statusPill = `<span class="status-pill free"><i class="fa-solid fa-circle-check"></i> ว่างตลอดวัน</span>`;
+                    statusBody = `<div style="color: var(--success); font-weight: 500;">พร้อมให้เข้าใช้งาน</div>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'room-status-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="room-card-header">
+                            <div>
+                                <div class="room-name">${roomObj.name}</div>
+                                <span class="room-group-tag">${roomObj.group}</span>
+                            </div>
+                            ${statusPill}
+                        </div>
+                        <div class="room-card-body">${statusBody}</div>
+                    </div>
+                    <button class="btn-quick-book" onclick="quickBook('${roomObj.name}')">
+                        <i class="fa-solid fa-calendar-plus"></i> จองห้องนี้เลย
+                    </button>
+                `;
+                roomStatusGrid.appendChild(card);
+            });
+        }
+
+        function filterRoomCards(group) {
+            currentTabFilter = group;
+            document.querySelectorAll('#roomTabs .tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.trim() === (group === 'all' ? 'ทั้งหมด' : group));
+            });
+            renderRoomDashboard();
+        }
+
+        // ⚡ ฟังก์ชัน Quick Book วาร์ปไปเลือกห้องให้ทันที
+        function quickBook(roomName) {
+            hideAllSections();
+            appSection.classList.remove('hidden');
+            roomSelect.value = roomName;
+            
+            // ตั้งค่าวันที่เริ่มต้นเป็นวันนี้
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = todayStr;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function setupDateLimits() {
@@ -685,24 +798,22 @@
 
         function generateRoomOptions() {
             roomSelect.innerHTML = '<option value="" disabled selected>-- เลือกสถานที่ --</option>';
-            const libraryGroup = document.createElement('optgroup');
-            libraryGroup.label = "📍 หอสมุด";
-            ['ห้องโครงงาน', 'ห้องเวทีใหญ่'].forEach(room => {
-                const opt = document.createElement('option');
-                opt.value = `${room} (หอสมุด)`; opt.textContent = `📚 ${room}`;
-                libraryGroup.appendChild(opt);
+            
+            const groups = {};
+            masterRooms.forEach(r => {
+                if (!groups[r.group]) groups[r.group] = [];
+                groups[r.group].push(r.name);
             });
-            roomSelect.appendChild(libraryGroup);
 
-            for (let floor = 1; floor <= 4; floor++) {
-                const bg = document.createElement('optgroup');
-                bg.label = `🏢 อาคาร 3 - ชั้น ${floor}`;
-                for (let r = 2; r <= 8; r++) {
+            for (const [groupName, roomList] of Object.entries(groups)) {
+                const optGroup = document.createElement('optgroup');
+                optGroup.label = `🏢 ${groupName}`;
+                roomList.forEach(roomName => {
                     const opt = document.createElement('option');
-                    opt.value = `ห้อง 3${floor}${r}`; opt.textContent = `🚪 ห้อง 3${floor}${r}`;
-                    bg.appendChild(opt);
-                }
-                roomSelect.appendChild(bg);
+                    opt.value = roomName; opt.textContent = roomName;
+                    optGroup.appendChild(opt);
+                });
+                roomSelect.appendChild(optGroup);
             }
         }
 
@@ -790,7 +901,7 @@
             });
         }
 
-        // 🛡️ ดึงข้อมูลผู้ใช้งาน ( Admin Only )
+        // 🛡️ ระบบ Admin
         function listenToUsers() {
             if (currentUser?.role !== 'admin') return;
             db.collection('users').onSnapshot(snapshot => {
@@ -813,7 +924,6 @@
                     ? `<span class="room-badge" style="color: #ea580c; background: #ffedd5;">ผู้ดูแลระบบ (Admin)</span>` 
                     : `<span class="room-badge" style="color: #2563eb; background: #dbeafe;">ผู้ใช้งาน (User)</span>`;
                 
-                // ปุ่มแก้ไขข้อมูลแบบใหม่ (ส่งค่าไปแก้ไขทั้งหมด)
                 const editBtn = `<button class="btn-edit-pass" onclick="editUser('${u.username}', '${u.name}', '${u.role}', '${u.password}')" title="แก้ไขข้อมูลผู้ใช้"><i class="fa-solid fa-user-pen"></i></button>`;
                 
                 const delBtn = u.username !== currentUser.username 
@@ -830,7 +940,6 @@
             });
         }
 
-        // 🛠️ ฟังก์ชันใหม่: แก้ไขข้อมูลผู้ใช้ทั้งหมด (Username, ชื่อ, บทบาท, รหัสผ่าน)
         async function editUser(oldUsername, oldName, oldRole, oldPassword) {
             if (currentUser.role !== 'admin') return;
 
@@ -839,19 +948,16 @@
                 html: `
                     <div class="swal-edit-form">
                         <label>Username</label>
-                        <input id="swal-username" class="swal2-input" value="${oldUsername}" placeholder="Username">
-                        
-                        <label>ชื่อ-นามสกุล (ที่ใช้แสดงผล)</label>
-                        <input id="swal-name" class="swal2-input" value="${oldName}" placeholder="ชื่อ-นามสกุล">
-                        
+                        <input id="swal-username" class="swal2-input" value="${oldUsername}">
+                        <label>ชื่อ-นามสกุล</label>
+                        <input id="swal-name" class="swal2-input" value="${oldName}">
                         <label>บทบาท (Role)</label>
                         <select id="swal-role" class="swal2-select">
                             <option value="user" ${oldRole === 'user' ? 'selected' : ''}>ผู้ใช้งานทั่วไป (User)</option>
                             <option value="admin" ${oldRole === 'admin' ? 'selected' : ''}>ผู้ดูแลระบบ (Admin)</option>
                         </select>
-
-                        <label>รหัสผ่าน (Password)</label>
-                        <input id="swal-password" type="text" class="swal2-input" value="${oldPassword}" placeholder="รหัสผ่าน">
+                        <label>รหัสผ่าน</label>
+                        <input id="swal-password" type="text" class="swal2-input" value="${oldPassword}">
                     </div>
                 `,
                 focusConfirm: false,
@@ -878,86 +984,58 @@
                 try {
                     Swal.showLoading();
 
-                    // กรณีที่ 1: เปลี่ยน Username (ต้องย้าย Document ใน Firestore)
                     if (newUsername !== oldUsername) {
-                        // เช็คก่อนว่า Username ใหม่ซ้ำกับคนอื่นไหม
                         const checkDoc = await db.collection('users').doc(newUsername).get();
                         if (checkDoc.exists) {
-                            Swal.fire({ icon: 'warning', title: 'Username นี้มีผู้ใช้แล้ว', text: 'กรุณาตั้ง Username อื่น' });
+                            Swal.fire({ icon: 'warning', title: 'Username นี้มีผู้ใช้แล้ว' });
                             return;
                         }
 
-                        // ดึงข้อมูลเดิม (เช่น ธีม)
                         const oldDoc = await db.collection('users').doc(oldUsername).get();
                         const oldData = oldDoc.data() || {};
 
-                        // สร้าง Document ใหม่ภายใต้ Username ใหม่
                         await db.collection('users').doc(newUsername).set({
-                            ...oldData,
-                            username: newUsername,
-                            name: newName,
-                            role: newRole,
-                            password: newPassword
+                            ...oldData, username: newUsername, name: newName, role: newRole, password: newPassword
                         });
-
-                        // ลบ Document เก่าทิ้ง
                         await db.collection('users').doc(oldUsername).delete();
 
-                        // อัปเดตรายการจองเดิมของผู้ใช้คนนี้ให้สอดคล้องกัน
                         const bookingSnaps = await db.collection('bookings').where('username', '==', oldUsername).get();
                         const batch = db.batch();
-                        bookingSnaps.forEach(doc => {
-                            batch.update(doc.ref, { username: newUsername, name: newName });
-                        });
+                        bookingSnaps.forEach(doc => batch.update(doc.ref, { username: newUsername, name: newName }));
                         await batch.commit();
 
-                        // ถ้าแอดมินแก้ไขตัวเอง
                         if (oldUsername === currentUser.username) {
-                            currentUser.username = newUsername;
-                            currentUser.name = newName;
-                            currentUser.role = newRole;
-                            currentUser.password = newPassword;
+                            currentUser.username = newUsername; currentUser.name = newName;
+                            currentUser.role = newRole; currentUser.password = newPassword;
                             localStorage.setItem('qroom_session', JSON.stringify(currentUser));
                             checkAuth();
                         }
-
                     } else {
-                        // กรณีที่ 2: ไม่ได้เปลี่ยน Username แค่อัปเดตฟิลด์อื่นๆ
                         await db.collection('users').doc(oldUsername).update({
-                            name: newName,
-                            role: newRole,
-                            password: newPassword
+                            name: newName, role: newRole, password: newPassword
                         });
 
-                        // ถ้าเปลี่ยนชื่อ ให้ตามไปอัปเดตชื่อในตารางจองด้วย
                         if (newName !== oldName) {
                             const bookingSnaps = await db.collection('bookings').where('username', '==', oldUsername).get();
                             const batch = db.batch();
-                            bookingSnaps.forEach(doc => {
-                                batch.update(doc.ref, { name: newName });
-                            });
+                            bookingSnaps.forEach(doc => batch.update(doc.ref, { name: newName }));
                             await batch.commit();
                         }
 
-                        // ถ้าแอดมินแก้ไขตัวเอง
                         if (oldUsername === currentUser.username) {
-                            currentUser.name = newName;
-                            currentUser.role = newRole;
-                            currentUser.password = newPassword;
+                            currentUser.name = newName; currentUser.role = newRole; currentUser.password = newPassword;
                             localStorage.setItem('qroom_session', JSON.stringify(currentUser));
                             checkAuth();
                         }
                     }
 
-                    Swal.fire({ icon: 'success', title: 'อัปเดตข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
-
+                    Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ!', timer: 1500, showConfirmButton: false });
                 } catch (err) {
                     Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
                 }
             }
         }
 
-        // เพิ่มผู้ใช้ใหม่
         addUserForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (currentUser.role !== 'admin') return;
@@ -972,7 +1050,7 @@
                 const userDoc = await userRef.get();
                 
                 if (userDoc.exists) {
-                    Swal.fire({ icon: 'warning', title: 'มีบัญชีนี้อยู่แล้ว', text: 'Username นี้ถูกใช้งานไปแล้ว' });
+                    Swal.fire({ icon: 'warning', title: 'มีบัญชีนี้อยู่แล้ว' });
                     return;
                 }
 
@@ -984,11 +1062,10 @@
             }
         });
 
-        // ลบผู้ใช้
         function deleteUser(username) {
             if (currentUser.role !== 'admin') return;
             Swal.fire({
-                title: `ต้องการลบ ${username} ใช่หรือไม่?`,
+                title: `ต้องการลบ ${username}?`,
                 text: "หากลบแล้ว จะไม่สามารถกู้คืนบัญชีนี้ได้!",
                 icon: 'warning',
                 showCancelButton: true,
