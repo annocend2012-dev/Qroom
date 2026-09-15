@@ -98,14 +98,16 @@
         .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary) 0%, #868CFF 100%); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 8px 15px rgba(67, 24, 255, 0.25); transition: all 0.3s ease; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(67, 24, 255, 0.4); }
         .btn-submit:active { transform: translateY(1px); box-shadow: 0 5px 10px rgba(67, 24, 255, 0.3); }
+        .btn-success { background: linear-gradient(135deg, var(--success) 0%, #059669 100%); box-shadow: 0 8px 15px rgba(16, 185, 129, 0.25); }
 
         .filter-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255, 255, 255, 0.4); border-bottom: 1px solid rgba(255, 255, 255, 0.6); flex-wrap: wrap; gap: 10px; }
         .filter-group { display: flex; align-items: center; gap: 8px; }
         .filter-group input[type="date"] { padding: 6px 10px; width: auto; }
         .filter-buttons { display: flex; gap: 8px; }
-        .btn-filter-primary, .btn-filter-secondary { padding: 6px 12px; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 500; cursor: pointer; }
+        .btn-filter-primary, .btn-filter-secondary { padding: 6px 12px; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s;}
         .btn-filter-primary { background-color: var(--primary); color: white; }
         .btn-filter-secondary { background-color: rgba(67, 24, 255, 0.1); color: var(--primary); }
+        .btn-filter-secondary:hover { background-color: rgba(67, 24, 255, 0.2); }
 
         .table-responsive { overflow-x: auto; padding: 10px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
@@ -116,7 +118,8 @@
         .time-badge { display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
         .room-badge { background: rgba(67, 24, 255, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
         .status-badge-done { background: #e2e8f0; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-right: 5px; }
-        .btn-delete { background: rgba(255, 82, 82, 0.1); color: var(--danger); border: 1px solid rgba(255, 82, 82, 0.3); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+        .btn-delete { background: rgba(255, 82, 82, 0.1); color: var(--danger); border: 1px solid rgba(255, 82, 82, 0.3); padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
+        .btn-delete:hover { background: var(--danger); color: white; }
 
         .hidden { display: none !important; }
         .auth-container { display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 15px; }
@@ -145,6 +148,10 @@
             <span>Qroom</span>
         </div>
         <div class="nav-profile hidden" id="userProfile">
+            <!-- 🛡️ ปุ่มเปิดหน้า Admin (จะแสดงเฉพาะแอดมิน) -->
+            <button id="btnAdminNav" class="btn-filter-secondary hidden" style="margin-right: 10px;">
+                <i class="fa-solid fa-user-shield"></i> จัดการระบบ
+            </button>
             <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
             <span id="welcomeText" style="font-size: 0.9rem;">ยินดีต้อนรับ</span>
             <button id="btnLogout" class="btn-logout" title="ออกจากระบบ">
@@ -153,7 +160,7 @@
         </div>
     </nav>
 
-    <!-- 🔐 1. หน้า Login (ตัดปุ่มสมัครออกแล้ว) -->
+    <!-- 🔐 1. หน้า Login -->
     <main id="authSection" class="auth-container">
         <div class="card glass-panel auth-card">
             <div class="auth-header">
@@ -289,15 +296,86 @@
         </section>
     </main>
 
+    <!-- 🛡️ 4. หน้า Admin (จัดการผู้ใช้) -->
+    <main id="adminSection" class="container hidden">
+        <!-- 4.1 ฟอร์มเพิ่มผู้ใช้งาน -->
+        <section class="card glass-panel fade-in-up">
+            <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
+                <h2><i class="fa-solid fa-user-plus" style="color: var(--success);"></i> เพิ่มผู้ใช้งานใหม่ (เฉพาะ Admin)</h2>
+                <p>สร้างบัญชีเข้าสู่ระบบให้บุคลากรหรือนักเรียน</p>
+            </div>
+            
+            <form id="addUserForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ตั้ง Username</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-id-badge"></i>
+                            <input type="text" id="newUsername" placeholder="เช่น user01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ตั้ง Password</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-key"></i>
+                            <input type="text" id="newPassword" placeholder="รหัสผ่าน" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อ-นามสกุล (สำหรับแสดงผล)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-font"></i>
+                        <input type="text" id="newName" placeholder="เช่น สมชาย ใจดี" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ระดับสิทธิ์</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-sitemap"></i>
+                        <select id="newRole">
+                            <option value="user">ผู้ใช้งานทั่วไป (User)</option>
+                            <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit btn-success">
+                    <i class="fa-solid fa-check"></i> สร้างบัญชีผู้ใช้
+                </button>
+            </form>
+        </section>
+
+        <!-- 4.2 ตารางจัดการผู้ใช้ -->
+        <section class="card glass-panel fade-in-up" style="animation-delay: 0.1s;">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-users-gear"></i> จัดการผู้ใช้งานในระบบ</h2>
+                <p>ดูรายชื่อและลบบัญชีผู้ใช้</p>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>ชื่อ-นามสกุล</th>
+                            <th>สิทธิ์</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
     <script>
-        // 🚨 อย่าลืมใส่ firebaseConfig ของคุณ!
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.firebasestorage.app",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+        // 🚨 อย่าลืมเช็ค firebaseConfig ของคุณ!
+     const firebaseConfig = {
+            apiKey: "AIzaSyDoKhnGQcXx8JDAHSWNygWWhHE8FDqvAQE",
+            authDomain: "qroom-b3a32.firebaseapp.com",
+            projectId: "qroom-b3a32",
+            storageBucket: "qroom-b3a32.firebasestorage.app",
+            messagingSenderId: "132074385246",
+            appId: "1:132074385246:web:359a8e0e544996d7fba9cf"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -306,7 +384,10 @@
         const authSection = document.getElementById('authSection');
         const landingSection = document.getElementById('landingSection');
         const appSection = document.getElementById('appSection');
+        const adminSection = document.getElementById('adminSection');
+        
         const btnEnterSystem = document.getElementById('btnEnterSystem');
+        const btnAdminNav = document.getElementById('btnAdminNav');
         const landingNameText = document.getElementById('landingNameText');
 
         const userProfile = document.getElementById('userProfile');
@@ -320,8 +401,13 @@
         const roomSelect = document.getElementById('room');
         const filterDateInput = document.getElementById('filterDate');
 
+        // ตัวแปรส่วน Admin
+        const addUserForm = document.getElementById('addUserForm');
+        const userTableBody = document.getElementById('userTableBody');
+
         let currentUser = null;
         let allBookings = [];
+        let allUsers = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
@@ -329,20 +415,29 @@
             generateRoomOptions();
         });
 
+        // 🔄 ระบบนำทาง (Navigation)
         btnEnterSystem.addEventListener('click', () => {
             landingSection.classList.add('hidden');
             appSection.classList.remove('hidden'); 
+            adminSection.classList.add('hidden');
+        });
+
+        btnAdminNav.addEventListener('click', () => {
+            landingSection.classList.add('hidden');
+            appSection.classList.add('hidden');
+            adminSection.classList.remove('hidden');
         });
 
         function goHome() {
             if (currentUser) {
                 authSection.classList.add('hidden');
                 appSection.classList.add('hidden');
+                adminSection.classList.add('hidden');
                 landingSection.classList.remove('hidden');
             }
         }
 
-        // โค้ดส่วน Login อย่างเดียว
+        // 🔐 ระบบเข้าสู่ระบบ
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
@@ -371,14 +466,26 @@
             const session = localStorage.getItem('qroom_session');
             if (session) {
                 currentUser = JSON.parse(session);
+                
+                // จัดการหน้า
                 authSection.classList.add('hidden');
                 appSection.classList.add('hidden');
+                adminSection.classList.add('hidden');
                 landingSection.classList.remove('hidden');
                 
+                // โปรไฟล์มุมขวาบน
                 userProfile.classList.remove('hidden');
                 welcomeText.textContent = currentUser.name;
                 landingNameText.textContent = `คุณ ${currentUser.name}`;
                 document.getElementById('name').value = currentUser.name;
+                
+                // แสดงปุ่มแอดมินหากมีสิทธิ์
+                if (currentUser.role === 'admin') {
+                    btnAdminNav.classList.remove('hidden');
+                    listenToUsers(); // โหลดรายชื่อผู้ใช้เตรียมไว้
+                } else {
+                    btnAdminNav.classList.add('hidden');
+                }
                 
                 listenToBookings();
             } else {
@@ -386,10 +493,12 @@
                 authSection.classList.remove('hidden');
                 landingSection.classList.add('hidden');
                 appSection.classList.add('hidden');
+                adminSection.classList.add('hidden');
                 userProfile.classList.add('hidden');
             }
         }
 
+        // 🏫 ระบบการจองห้อง (โค้ดเดิม)
         function listenToBookings() {
             db.collection('bookings').onSnapshot(snapshot => {
                 allBookings = [];
@@ -497,7 +606,7 @@
                 if (isPast) row.classList.add('past-booking');
 
                 const fDate = bDate.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
-                const delBtn = (currentUser.username === b.username) 
+                const delBtn = (currentUser.username === b.username || currentUser.role === 'admin') 
                     ? `<button class="btn-delete" onclick="deleteBooking('${b.id}')"><i class="fa-solid fa-trash-can"></i></button>` 
                     : `<i class="fa-solid fa-lock" style="color:#aaa;"></i>`;
 
@@ -508,6 +617,96 @@
                     <td>${isPast ? '<span class="status-badge-done">ผ่านไปแล้ว</span>' : ''}${delBtn}</td>
                 `;
                 bookingTableBody.appendChild(row);
+            });
+        }
+
+        // 🛡️ ระบบ Admin (จัดการผู้ใช้งาน)
+        // 1. โหลดข้อมูลผู้ใช้ทั้งหมด
+        function listenToUsers() {
+            if (currentUser?.role !== 'admin') return;
+            db.collection('users').onSnapshot(snapshot => {
+                allUsers = [];
+                snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data() }));
+                displayUsers();
+            });
+        }
+
+        // 2. แสดงตารางผู้ใช้
+        function displayUsers() {
+            userTableBody.innerHTML = '';
+            if (allUsers.length === 0) {
+                userTableBody.innerHTML = `<tr><td colspan="4" class="no-data">ไม่มีข้อมูลผู้ใช้</td></tr>`;
+                return;
+            }
+
+            allUsers.forEach((u, index) => {
+                const row = document.createElement('tr');
+                const roleBadge = u.role === 'admin' 
+                    ? `<span class="room-badge" style="color: #ea580c; background: #ffedd5;">ผู้ดูแลระบบ (Admin)</span>` 
+                    : `<span class="room-badge" style="color: #2563eb; background: #dbeafe;">ผู้ใช้งาน (User)</span>`;
+                
+                // ป้องกันแอดมินลบตัวเอง
+                const delBtn = u.username !== currentUser.username 
+                    ? `<button class="btn-delete" onclick="deleteUser('${u.username}')" title="ลบผู้ใช้"><i class="fa-solid fa-user-minus"></i></button>` 
+                    : `<span class="status-badge-done">คุณเอง</span>`;
+
+                row.innerHTML = `
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.name}</td>
+                    <td>${roleBadge}</td>
+                    <td>${delBtn}</td>
+                `;
+                userTableBody.appendChild(row);
+            });
+        }
+
+        // 3. ฟังก์ชันเพิ่มผู้ใช้
+        addUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (currentUser.role !== 'admin') return;
+
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            try {
+                const userRef = db.collection('users').doc(username);
+                const userDoc = await userRef.get();
+                
+                if (userDoc.exists) {
+                    Swal.fire({ icon: 'warning', title: 'มีบัญชีนี้อยู่แล้ว', text: 'Username นี้ถูกใช้งานไปแล้ว' });
+                    return;
+                }
+
+                await userRef.set({ username, password, name, role });
+                Swal.fire({ icon: 'success', title: 'สร้างบัญชีสำเร็จ', timer: 1500, showConfirmButton: false });
+                addUserForm.reset();
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: err.message });
+            }
+        });
+
+        // 4. ฟังก์ชันลบผู้ใช้
+        function deleteUser(username) {
+            if (currentUser.role !== 'admin') return;
+            Swal.fire({
+                title: `ต้องการลบ ${username} ใช่หรือไม่?`,
+                text: "หากลบแล้ว จะไม่สามารถกู้คืนบัญชีนี้ได้!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff5252',
+                confirmButtonText: 'ใช่, ลบเลย',
+                cancelButtonText: 'ยกเลิก'
+            }).then(async (res) => {
+                if (res.isConfirmed) {
+                    try {
+                        await db.collection('users').doc(username).delete();
+                        Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', timer: 1500, showConfirmButton: false });
+                    } catch (err) {
+                        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+                    }
+                }
             });
         }
     </script>
