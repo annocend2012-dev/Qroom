@@ -64,62 +64,66 @@
             transition: background 0.3s, border 0.3s;
         }
 
-        /* 📢 แถบข้อความวิ่งด้านบนสุด (Marquee Ticker) */
-        .marquee-banner {
+        /* 📢 แถบป็อปอัปประชาสัมพันธ์สลับแสดงทีละห้อง (เปลี่ยนทุก 20 วินาที) */
+        .announcement-banner {
             width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--card-border);
-            padding: 8px 0;
+            padding: 10px 20px;
             position: relative;
             z-index: 101;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 500;
             display: flex;
             align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 44px;
         }
 
-        .marquee-content {
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%;
-            animation: marquee 30s linear infinite;
-        }
-
-        .marquee-banner:hover .marquee-content {
-            animation-play-state: paused;
-        }
-
-        @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        .marquee-item {
-            display: inline-flex;
+        .announcement-content {
+            display: flex;
             align-items: center;
-            gap: 6px;
-            margin-right: 35px;
+            justify-content: center;
+            gap: 10px;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            text-align: center;
+            flex-wrap: wrap;
         }
 
-        .marquee-badge-busy {
+        .announcement-content.fade-out {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+
+        .announcement-content.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .announcement-badge-busy {
             background: rgba(255, 82, 82, 0.18);
             color: #dc2626;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .marquee-badge-free {
+        .announcement-badge-free {
             background: rgba(16, 185, 129, 0.18);
             color: #059669;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
         /* Navbar Header */
@@ -341,10 +345,10 @@
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
 
-    <!-- 📢 แถบประชาสัมพันธ์ข้อความวิ่งด้านบนสุด -->
-    <div class="marquee-banner" id="marqueeBanner">
-        <div class="marquee-content" id="marqueeTicker">
-            <span><i class="fa-solid fa-bullhorn"></i> กำลังโหลดข้อมูลประชาสัมพันธ์การจองห้อง...</span>
+    <!-- 📢 แถบป็อปอัปประชาสัมพันธ์สลับแสดงทีละห้อง (เว้นเวลา 20 วินาที) -->
+    <div class="announcement-banner" id="announcementBanner">
+        <div class="announcement-content fade-in" id="announcementText">
+            <span><i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> กำลังโหลดข้อมูลประชาสัมพันธ์ห้อง...</span>
         </div>
     </div>
 
@@ -958,6 +962,11 @@
         let currentTabFilter = 'all';
         let statsCurrentMonday = null;
 
+        // ตัวแปรระบบประชาสัมพันธ์
+        let announcementList = [];
+        let currentAnnouncementIndex = 0;
+        let announcementTimer = null;
+
         // 🎨 รายการธีมสี
         const themes = {
             'default': { bg: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', text: '#1b2559', textMuted: '#68769f', cardBg: 'rgba(255, 255, 255, 0.75)', border: 'rgba(255, 255, 255, 0.5)', inputBg: 'rgba(255, 255, 255, 0.5)', btnColor: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
@@ -977,10 +986,10 @@
             generateRoomOptions();
         });
 
-        /* 📢 ฟังก์ชันประมวลผลข้อความสุ่มวิ่งประชาสัมพันธ์ด้านบน */
-        function renderMarqueeAnnouncements() {
-            const ticker = document.getElementById('marqueeTicker');
-            if (!ticker) return;
+        /* 📢 ฟังก์ชันประมวลผลระบบสุ่มป็อปอัปประชาสัมพันธ์ทีละห้อง (เปลี่ยนทุก 20 วินาที) */
+        function renderAnnouncements() {
+            const container = document.getElementById('announcementText');
+            if (!container) return;
 
             const now = new Date();
             const year = now.getFullYear();
@@ -989,43 +998,66 @@
             const todayStr = `${year}-${month}-${day}`;
 
             const todayBookings = allBookings.filter(b => b.date === todayStr);
-            let announcementItems = [];
+            let items = [];
 
-            // 1. เพิ่มรายการคิวห้องที่ถูกจองแล้วของวันนี้
+            // 1. ดึงห้องที่ถูกจองแล้วของวันนี้
             todayBookings.forEach(b => {
-                announcementItems.push(`
-                    <span class="marquee-item">
-                        <span class="marquee-badge-busy"><i class="fa-solid fa-bookmark"></i> จองแล้ว</span>
-                        <strong>${b.room}</strong> (เวลา ${b.startTime} - ${b.endTime} น.) โดย คุณ${b.name}
-                    </span>
+                items.push(`
+                    <span class="announcement-badge-busy"><i class="fa-solid fa-bookmark"></i> ถูกจองแล้ววันนี้</span>
+                    <span><strong>${b.room}</strong> — ช่วงเวลา <strong style="color:var(--primary);">${b.startTime} - ${b.endTime} น.</strong> (โดย คุณ${b.name})</span>
                 `);
             });
 
-            // 2. สุ่มค้นหาห้องที่ว่างอยู่ในวันนี้
+            // 2. ดึงห้องที่มีสถานะว่างประจำวันนี้
             const busyRoomNames = new Set(todayBookings.map(b => b.room));
             const freeRooms = masterRooms.filter(r => !busyRoomNames.has(r.name));
 
-            // สุ่มลำดับห้องว่างมาผสม
+            // สุ่มเลือกห้องว่างขึ้นมาแสดงผล
             const shuffledFree = [...freeRooms].sort(() => 0.5 - Math.random());
             const selectedFree = shuffledFree.slice(0, Math.max(6, 12 - todayBookings.length));
 
             selectedFree.forEach(r => {
-                announcementItems.push(`
-                    <span class="marquee-item">
-                        <span class="marquee-badge-free"><i class="fa-solid fa-circle-check"></i> ห้องว่างวันนี้</span>
-                        <strong>${r.name}</strong> (${r.group}) พร้อมเปิดใช้งาน
-                    </span>
+                items.push(`
+                    <span class="announcement-badge-free"><i class="fa-solid fa-circle-check"></i> ห้องว่างวันนี้</span>
+                    <span><strong>${r.name}</strong> (${r.group}) — พร้อมเปิดให้เข้าใช้งานสำหรับวันนี้</span>
                 `);
             });
 
-            // สุ่มคละข้อความทั้งหมดเข้าด้วยกัน
-            announcementItems.sort(() => 0.5 - Math.random());
+            // สุ่มลำดับรายการทั้งหมดเข้าด้วยกัน
+            items.sort(() => 0.5 - Math.random());
+            announcementList = items;
+            currentAnnouncementIndex = 0;
 
-            if (announcementItems.length === 0) {
-                ticker.innerHTML = `<span><i class="fa-solid fa-bullhorn"></i> ระบบ Qroom ยินดีต้อนรับ - ขณะนี้ทุกห้องว่างพร้อมให้จองใช้งาน</span>`;
-            } else {
-                ticker.innerHTML = announcementItems.join(' &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; ');
+            if (announcementTimer) clearInterval(announcementTimer);
+
+            if (announcementList.length === 0) {
+                container.innerHTML = `<span><i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> ขณะนี้ทุกห้องว่างพร้อมเปิดให้สมาชิกลงคิวจองใช้งาน</span>`;
+                return;
             }
+
+            // แสดงรายการแรกทันที
+            updateAnnouncementDisplay();
+
+            // ตั้งเวลาสลับเปลี่ยนห้องถัดไปทุกๆ 20 วินาที (20,000 มิลลิวินาที)
+            announcementTimer = setInterval(() => {
+                currentAnnouncementIndex = (currentAnnouncementIndex + 1) % announcementList.length;
+                updateAnnouncementDisplay();
+            }, 20000);
+        }
+
+        function updateAnnouncementDisplay() {
+            const container = document.getElementById('announcementText');
+            if (!container || announcementList.length === 0) return;
+
+            // เอฟเฟกต์ Fade Out
+            container.classList.remove('fade-in');
+            container.classList.add('fade-out');
+
+            setTimeout(() => {
+                container.innerHTML = `<i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> ` + announcementList[currentAnnouncementIndex];
+                container.classList.remove('fade-out');
+                container.classList.add('fade-in');
+            }, 600);
         }
 
         /* ⏱️ ฟังก์ชันตรวจสอบว่าการจองหมดเวลาไปแล้วหรือยัง */
@@ -1782,7 +1814,7 @@
                 renderHomeDashboard();
                 renderRoomDashboard();
                 renderAdminInspections();
-                renderMarqueeAnnouncements(); // อัปเดตข้อความประชาสัมพันธ์วิ่ง
+                renderAnnouncements(); // เรียกใช้ระบบประชาสัมพันธ์
                 
                 if (currentUser && document.getElementById('myTodaySection') && !document.getElementById('myTodaySection').classList.contains('hidden')) {
                     renderMyTodayBookings();
