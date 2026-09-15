@@ -239,6 +239,15 @@
         .room-badge { background: rgba(67, 24, 255, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
         .status-badge-done { background: var(--card-border); color: var(--text-muted); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-right: 5px; }
         
+        /* 📷 ปุ่มสำหรับอัปโหลดและตรวจรูปถ่าย */
+        .btn-photo-upload { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-right: 5px; }
+        .btn-photo-upload:hover { background: #10b981; color: white; }
+        .btn-photo-view { background: rgba(67, 24, 255, 0.12); color: var(--primary); border: 1px solid rgba(67, 24, 255, 0.3); padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-right: 5px; }
+        .btn-photo-view:hover { background: var(--primary); color: white; }
+
+        .img-thumb-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid var(--card-border); cursor: pointer; transition: 0.2s; }
+        .img-thumb-preview:hover { transform: scale(1.1); border-color: var(--primary); }
+
         .btn-delete { background: rgba(255, 82, 82, 0.1); color: var(--danger); border: 1px solid rgba(255, 82, 82, 0.3); padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
         .btn-delete:hover { background: var(--danger); color: white; }
 
@@ -531,7 +540,7 @@
         <section class="card glass-panel fade-in-up" style="animation-delay: 0.1s;">
             <div class="card-header">
                 <h2><i class="fa-solid fa-clipboard-list"></i> ตารางและคิวการใช้ห้อง</h2>
-                <p>ดูคิวประจำวันหรือย้อนหลังได้สูงสุด 1 เดือน</p>
+                <p>ดูคิวประจำวัน แนบรูปส่งคืนห้อง หรือดูย้อนหลัง</p>
             </div>
             
             <div class="filter-bar">
@@ -552,6 +561,7 @@
                             <th>วัน/เวลา</th>
                             <th>ห้อง</th>
                             <th>ผู้จอง</th>
+                            <th>ส่งคืนห้อง (ตรวจสะอาด)</th>
                             <th>จัดการ</th>
                         </tr>
                     </thead>
@@ -561,7 +571,7 @@
         </section>
     </main>
 
-    <!-- 📈 4. หน้าสถิติการจองรายสัปดาห์ (Weekly Booking Statistics) -->
+    <!-- 📈 4. หน้าสถิติการจองรายสัปดาห์ -->
     <main id="statsSection" class="page-container hidden">
         <div class="card glass-panel fade-in-up" style="margin-bottom: 20px;">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -577,7 +587,6 @@
             <div style="padding: 20px;">
                 <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; justify-content: space-between;">
                     
-                    <!-- กล่องค้นหาผู้ใช้สำหรับ Admin -->
                     <div id="adminUserSearchGroup" class="hidden" style="flex: 1; min-width: 260px;">
                         <label style="font-weight: 600; margin-bottom: 6px; display: block;">
                             <i class="fa-solid fa-user-gear" style="color:var(--primary);"></i> เลือก/ค้นหาผู้ใช้งาน (สำหรับ Admin):
@@ -587,7 +596,6 @@
                         </select>
                     </div>
 
-                    <!-- ปุ่มควบคุมสัปดาห์ -->
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
                         <button type="button" class="btn-filter-secondary" onclick="changeStatsWeek(-1)" title="สัปดาห์ก่อนหน้า">
                             <i class="fa-solid fa-chevron-left"></i> สัปดาห์ก่อน
@@ -609,7 +617,6 @@
             </div>
         </div>
 
-        <!-- การ์ดสรุปตัวเลขสถิติประจำสัปดาห์ -->
         <div class="stat-grid" style="margin-bottom: 20px;">
             <div class="stat-card glass-panel">
                 <div class="stat-icon-box" style="background: rgba(67, 24, 255, 0.15); color: var(--primary);">
@@ -642,7 +649,6 @@
             </div>
         </div>
 
-        <!-- ตารางสรุปรายวันในสัปดาห์ (จันทร์ - อาทิตย์) -->
         <div class="card glass-panel fade-in-up" style="margin-bottom: 20px;">
             <div class="card-header">
                 <h2><i class="fa-solid fa-calendar-week"></i> สรุปรายวันในสัปดาห์นี้ (จันทร์ - อาทิตย์)</h2>
@@ -663,7 +669,6 @@
             </div>
         </div>
 
-        <!-- ตารางรายการจองทั้งหมดในสัปดาห์นี้ -->
         <div class="card glass-panel fade-in-up">
             <div class="card-header">
                 <h2><i class="fa-solid fa-list-ul"></i> รายการจองทั้งหมดในสัปดาห์นี้</h2>
@@ -676,7 +681,7 @@
                             <th>เวลา</th>
                             <th>ระยะเวลา</th>
                             <th>สถานที่ / ห้อง</th>
-                            <th>สถานะ</th>
+                            <th>สถานะคืนห้อง</th>
                         </tr>
                     </thead>
                     <tbody id="statsDetailTableBody"></tbody>
@@ -715,7 +720,7 @@
         </section>
     </main>
 
-    <!-- 🛡️ 6. หน้า Admin -->
+    <!-- 🛡️ 6. หน้า Admin & ตรวจสอบความสะอาดห้อง -->
     <main id="adminSection" class="page-container container-2col hidden">
         <section class="card glass-panel fade-in-up">
             <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
@@ -761,24 +766,43 @@
                     <i class="fa-solid fa-check"></i> สร้างบัญชีผู้ใช้
                 </button>
             </form>
-        </section>
 
-        <section class="card glass-panel fade-in-up" style="animation-delay: 0.1s;">
-            <div class="card-header">
+            <div class="card-header" style="border-top:1px solid var(--card-border); margin-top:20px;">
                 <h2><i class="fa-solid fa-users-gear"></i> จัดการผู้ใช้งานในระบบ</h2>
-                <p>แก้ไข Username, ชื่อ, สิทธิ์ (Role), รหัสผ่าน หรือลบบัญชีผู้ใช้</p>
             </div>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>Username</th>
-                            <th>ชื่อ-นามสกุล</th>
+                            <th>ชื่อ</th>
                             <th>สิทธิ์</th>
                             <th>จัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 🧹 ตารางตรวจสอบภาพถ่ายความเรียบร้อยของ Admin -->
+        <section class="card glass-panel fade-in-up" style="animation-delay: 0.1s;">
+            <div class="card-header" style="background: rgba(67, 24, 255, 0.08);">
+                <h2><i class="fa-solid fa-broom" style="color: var(--primary);"></i> ตรวจสอบความเรียบร้อยห้องพักหลังใช้งาน</h2>
+                <p>ตรวจสอบรูปถ่ายความสะอาดและอนุมัติการคืนห้อง</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>วันที่ / ห้อง</th>
+                            <th>ผู้ใช้งาน</th>
+                            <th>รูปสภาพห้อง</th>
+                            <th>ประเมินความสะอาด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminInspectionTableBody"></tbody>
                 </table>
             </div>
         </section>
@@ -840,12 +864,13 @@
         const userTableBody = document.getElementById('userTableBody');
         const profileSettingForm = document.getElementById('profileSettingForm');
         const roomStatusGrid = document.getElementById('roomStatusGrid');
+        const adminInspectionTableBody = document.getElementById('adminInspectionTableBody');
 
         let currentUser = null;
         let allBookings = [];
         let allUsers = [];
         let currentTabFilter = 'all';
-        let statsCurrentMonday = null; // เก็บวันจันทร์ของสัปดาห์ที่เลือกในหน้าสถิติ
+        let statsCurrentMonday = null;
 
         // 🎨 รายการธีมสี
         const themes = {
@@ -877,7 +902,6 @@
             drawerOverlay.classList.remove('active');
         }
 
-        /* 🚀 ระบบสลับหน้าหลักผ่าน Drawer Menu */
         function goToPage(pageName) {
             closeDrawer();
             hideAllSections();
@@ -908,6 +932,7 @@
                 if (currentUser && currentUser.role === 'admin') {
                     adminSection.classList.remove('hidden');
                     document.getElementById('menuAdmin').classList.add('active');
+                    renderAdminInspections();
                 } else {
                     goToPage('home');
                 }
@@ -1076,11 +1101,157 @@
             document.getElementById('date').value = todayStr;
         }
 
+        /* 📸 ================= ระบบจัดการภาพถ่ายความเรียบร้อยคืนห้อง ================= */
+
+        // ฟังก์ชันย่อขนาดไฟล์รูปภาพผ่าน Canvas เพื่อบันทึกลง Firestore ได้เบาๆ
+        function compressImage(file, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxWidth) {
+                            h = Math.round((h * maxWidth) / w);
+                            w = maxWidth;
+                        }
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
+
+        // เปิดป๊อปอัพส่งรูปถ่ายคืนห้องสำหรับผู้ใช้
+        async function openCheckoutPhotoModal(bookingId) {
+            const { value: file } = await Swal.fire({
+                title: '📷 แนบรูปถ่ายส่งคืนห้อง',
+                text: 'ถ่ายหรือเลือกรูปภาพสภาพห้องหลังใช้งานเสร็จ เพื่อให้แอดมินตรวจความเรียบร้อย',
+                input: 'file',
+                inputAttributes: {
+                    'accept': 'image/*',
+                    'capture': 'environment'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'อัปโหลดรูปภาพ',
+                cancelButtonText: 'ยกเลิก',
+                inputValidator: (v) => { if (!v) return 'กรุณาถ่ายหรือเลือกรูปภาพก่อนครับ!'; }
+            });
+
+            if (file) {
+                try {
+                    Swal.showLoading();
+                    const base64Img = await compressImage(file);
+                    await db.collection('bookings').doc(bookingId).update({
+                        checkoutPhoto: base64Img,
+                        checkoutStatus: 'pending',
+                        checkoutTime: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    Swal.fire({ icon: 'success', title: 'ส่งรูปภาพสำเร็จ!', text: 'ส่งข้อมูลสภาพห้องเรียบร้อย รอแอดมินตรวจสอบ', timer: 1800, showConfirmButton: false });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+                }
+            }
+        }
+
+        // ดูรูปถ่ายแบบเต็ม
+        function viewPhotoModal(photoUrl, room, user, note = '') {
+            Swal.fire({
+                title: `📷 สภาพห้อง: ${room}`,
+                html: `<div>ผู้ส่งคืน: <strong>${user}</strong></div>${note ? `<div style="color:var(--danger); font-weight:600; margin-top:5px;">หมายเหตุ: ${note}</div>` : ''}`,
+                imageUrl: photoUrl,
+                imageAlt: 'สภาพห้องหลังใช้งาน',
+                confirmButtonText: 'ปิดหน้าต่าง'
+            });
+        }
+
+        // สำหรับ Admin อนุมัติ/ตักเตือน
+        async function verifyCleanliness(bookingId, status) {
+            let note = '';
+            if (status === 'rejected') {
+                const { value: text } = await Swal.fire({
+                    title: 'ข้อผิดพลาด / สิ่งที่ต้องปรับปรุง',
+                    input: 'textarea',
+                    inputPlaceholder: 'ระบุสาเหตุ เช่น ไม่เก็บขยะ, ลืมปิดแอร์/ไฟ...',
+                    showCancelButton: true,
+                    confirmButtonText: 'บันทึกตักเตือน',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (text === undefined) return;
+                note = text;
+            }
+
+            try {
+                await db.collection('bookings').doc(bookingId).update({
+                    checkoutStatus: status,
+                    checkoutNote: note,
+                    verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                Swal.fire({ icon: 'success', title: 'บันทึกการประเมินแล้ว!', timer: 1500, showConfirmButton: false });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+            }
+        }
+
+        // แสดงผลในตาราง Admin ตรวจสภาพห้อง
+        function renderAdminInspections() {
+            if (!adminInspectionTableBody) return;
+            adminInspectionTableBody.innerHTML = '';
+
+            const photoBookings = allBookings.filter(b => b.checkoutPhoto);
+
+            if (photoBookings.length === 0) {
+                adminInspectionTableBody.innerHTML = `<tr><td colspan="4" class="no-data"><i class="fa-solid fa-broom"></i> ยังไม่มีรายการส่งรูปคืนห้อง</td></tr>`;
+                return;
+            }
+
+            photoBookings.forEach(b => {
+                const tr = document.createElement('tr');
+                
+                let statusBadge = '';
+                if (b.checkoutStatus === 'pending') {
+                    statusBadge = `<span class="status-pill reserved"><i class="fa-solid fa-clock"></i> รอตรวจสอบ</span>`;
+                } else if (b.checkoutStatus === 'approved') {
+                    statusBadge = `<span class="status-pill free"><i class="fa-solid fa-check"></i> ผ่าน (เรียบร้อยดี)</span>`;
+                } else if (b.checkoutStatus === 'rejected') {
+                    statusBadge = `<span class="status-pill busy"><i class="fa-solid fa-xmark"></i> ไม่ผ่าน (ต้องปรับปรุง)</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td>
+                        <strong>${b.room}</strong>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${b.date} (${b.startTime}-${b.endTime})</div>
+                    </td>
+                    <td><strong>${b.name}</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">@${b.username}</span></td>
+                    <td>
+                        <img src="${b.checkoutPhoto}" class="img-thumb-preview" onclick="viewPhotoModal('${b.checkoutPhoto}', '${b.room}', '${b.name}', '${b.checkoutNote || ''}')" title="คลิกดูรูปขยายใหญ่">
+                    </td>
+                    <td>
+                        <div style="margin-bottom:6px;">${statusBadge}</div>
+                        <div style="display:flex; gap:4px;">
+                            <button class="btn-filter-primary" style="padding:4px 8px; font-size:0.75rem;" onclick="verifyCleanliness('${b.id}', 'approved')"><i class="fa-solid fa-check"></i> ผ่าน</button>
+                            <button class="btn-delete" style="padding:4px 8px; font-size:0.75rem;" onclick="verifyCleanliness('${b.id}', 'rejected')"><i class="fa-solid fa-xmark"></i> แก้ไข</button>
+                        </div>
+                    </td>
+                `;
+                adminInspectionTableBody.appendChild(tr);
+            });
+        }
+
         /* 📈 ================= ระบบคำนวณสถิติการจองรายสัปดาห์ ================= */
         
         function getMondayOfDate(d) {
             const date = new Date(d);
-            const day = date.getDay(); // 0 คือ อาทิตย์, 1 คือ จันทร์
+            const day = date.getDay();
             const diff = date.getDate() - day + (day === 0 ? -6 : 1);
             const monday = new Date(date.setDate(diff));
             monday.setHours(0,0,0,0);
@@ -1152,7 +1323,6 @@
         function renderWeeklyStats() {
             if (!statsCurrentMonday) return;
 
-            // กำหนดเป้าหมาย Username ที่ต้องการดู
             let targetUsername = currentUser.username;
             if (currentUser.role === 'admin') {
                 const adminSel = document.getElementById('statsAdminUserSelect');
@@ -1161,32 +1331,26 @@
                 }
             }
 
-            // ดึงชื่อผู้ใช้เป้าหมายมาโชว์
             const targetUserObj = allUsers.find(u => u.username === targetUsername) || (currentUser.username === targetUsername ? currentUser : { name: targetUsername, username: targetUsername });
             document.getElementById('statsTargetUserName').textContent = `${targetUserObj.name} (@${targetUsername})`;
 
-            // คำนวณวันอาทิตย์ (สิ้นสุดสัปดาห์)
             const sunday = new Date(statsCurrentMonday);
             sunday.setDate(sunday.getDate() + 6);
             sunday.setHours(23, 59, 59, 999);
 
-            // แสดงข้อความช่วงวันที่
             const dateFmt = { day: 'numeric', month: 'short', year: 'numeric' };
             const rangeStr = `${statsCurrentMonday.toLocaleDateString('th-TH', dateFmt)} - ${sunday.toLocaleDateString('th-TH', dateFmt)}`;
             document.getElementById('statsRangeText').textContent = rangeStr;
 
-            // ตั้งค่าวันที่บน Date Picker ให้ตรงกับวันจันทร์
             const mondayYMD = `${statsCurrentMonday.getFullYear()}-${String(statsCurrentMonday.getMonth()+1).padStart(2,'0')}-${String(statsCurrentMonday.getDate()).padStart(2,'0')}`;
             document.getElementById('statsWeekPicker').value = mondayYMD;
 
-            // กรองดึงรายการจองของผู้ใช้นี้ในสัปดาห์นี้
             const weekBookings = allBookings.filter(b => {
                 if (b.username !== targetUsername) return false;
                 const bDate = new Date(`${b.date}T00:00:00`);
                 return bDate >= statsCurrentMonday && bDate <= sunday;
             });
 
-            // คำนวณสรุปยอดสถิติ
             let totalHours = 0;
             const roomFrequency = {};
             weekBookings.forEach(b => {
@@ -1204,12 +1368,10 @@
                 }
             }
 
-            // แสดงผลการ์ดสถิติ
             document.getElementById('statsWeekTotalCount').textContent = weekBookings.length;
             document.getElementById('statsWeekTotalHours').textContent = totalHours.toFixed(1).replace('.0', '') + ' ชม.';
             document.getElementById('statsWeekTopRoom').textContent = topRoom;
 
-            // สร้างตารางสรุปรายวัน (จันทร์ - อาทิตย์)
             const dayNames = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
             const dailyTbody = document.getElementById('statsDailyTableBody');
             dailyTbody.innerHTML = '';
@@ -1245,30 +1407,29 @@
                 dailyTbody.appendChild(tr);
             }
 
-            // สร้างตารางรายการจองทั้งหมดในสัปดาห์
             const detailTbody = document.getElementById('statsDetailTableBody');
             detailTbody.innerHTML = '';
 
             if (weekBookings.length === 0) {
                 detailTbody.innerHTML = `<tr><td colspan="5" class="no-data"><i class="fa-solid fa-folder-open"></i> ไม่พบประวัติการจองคิวในสัปดาห์นี้</td></tr>`;
             } else {
-                const today0 = new Date(); today0.setHours(0,0,0,0);
-                
                 weekBookings.forEach(b => {
                     const bDate = new Date(`${b.date}T00:00:00`);
-                    const isPast = bDate < today0;
                     const fDate = bDate.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
                     const hrs = calculateHours(b.startTime, b.endTime);
 
-                    const tr = document.createElement('tr');
-                    if (isPast) tr.classList.add('past-booking');
+                    let statusTag = '-';
+                    if (b.checkoutStatus === 'pending') statusTag = '<span class="status-pill reserved"><i class="fa-solid fa-clock"></i> รอตรวจ</span>';
+                    else if (b.checkoutStatus === 'approved') statusTag = '<span class="status-pill free"><i class="fa-solid fa-check"></i> เรียบร้อย</span>';
+                    else if (b.checkoutStatus === 'rejected') statusTag = '<span class="status-pill busy"><i class="fa-solid fa-xmark"></i> ต้องแก้ไข</span>';
 
+                    const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><strong>${fDate}</strong></td>
                         <td>${b.startTime} - ${b.endTime} น.</td>
                         <td><strong>${hrs.toFixed(1).replace('.0', '')} ชม.</strong></td>
                         <td><span class="room-badge">${b.room}</span></td>
-                        <td>${isPast ? '<span class="status-badge-done">ผ่านไปแล้ว</span>' : '<span class="status-pill free" style="font-size:0.75rem;"><i class="fa-solid fa-clock"></i> ล่วงหน้า</span>'}</td>
+                        <td>${statusTag}</td>
                     `;
                     detailTbody.appendChild(tr);
                 });
@@ -1375,6 +1536,7 @@
                 displayBookings(filterDateInput.value);
                 renderHomeDashboard();
                 renderRoomDashboard();
+                renderAdminInspections();
                 if (currentUser && document.getElementById('statsSection') && !document.getElementById('statsSection').classList.contains('hidden')) {
                     renderWeeklyStats();
                 }
@@ -1463,7 +1625,7 @@
             if (filterDate) list = list.filter(b => b.date === filterDate);
 
             if (list.length === 0) {
-                bookingTableBody.innerHTML = `<tr><td colspan="4" class="no-data"><i class="fa-solid fa-folder-open"></i> ไม่มีรายการจอง</td></tr>`;
+                bookingTableBody.innerHTML = `<tr><td colspan="5" class="no-data"><i class="fa-solid fa-folder-open"></i> ไม่มีรายการจอง</td></tr>`;
                 return;
             }
 
@@ -1481,10 +1643,27 @@
                     ? `<button class="btn-delete" onclick="deleteBooking('${b.id}')"><i class="fa-solid fa-trash-can"></i></button>` 
                     : `<i class="fa-solid fa-lock" style="color:#aaa;"></i>`;
 
+                // การจัดการแสดงปุ่ม/สถานะแนบรูปคืนห้อง
+                let photoCol = '-';
+                if (currentUser.username === b.username || currentUser.role === 'admin') {
+                    if (b.checkoutPhoto) {
+                        let statusTag = '⏳ รอตรวจ';
+                        if (b.checkoutStatus === 'approved') statusTag = '✅ เรียบร้อย';
+                        if (b.checkoutStatus === 'rejected') statusTag = '❌ ต้องแก้ไข';
+                        
+                        photoCol = `<button class="btn-photo-view" onclick="viewPhotoModal('${b.checkoutPhoto}', '${b.room}', '${b.name}', '${b.checkoutNote || ''}')"><i class="fa-solid fa-image"></i> ดูรูป (${statusTag})</button>`;
+                    } else {
+                        photoCol = `<button class="btn-photo-upload" onclick="openCheckoutPhotoModal('${b.id}')"><i class="fa-solid fa-camera"></i> ส่งรูปคืนห้อง</button>`;
+                    }
+                } else if (b.checkoutPhoto) {
+                    photoCol = `<span class="status-badge-done">ส่งรูปแล้ว</span>`;
+                }
+
                 row.innerHTML = `
                     <td><strong>${fDate}</strong><span class="time-badge">${b.startTime}-${b.endTime}</span></td>
                     <td><span class="room-badge">${b.room}</span></td>
                     <td><strong>${b.name}</strong></td>
+                    <td>${photoCol}</td>
                     <td>${isPast ? '<span class="status-badge-done">ผ่านไปแล้ว</span>' : ''}${delBtn}</td>
                 `;
                 bookingTableBody.appendChild(row);
@@ -1512,10 +1691,10 @@
             allUsers.forEach((u) => {
                 const row = document.createElement('tr');
                 const roleBadge = u.role === 'admin' 
-                    ? `<span class="room-badge" style="color: #ea580c; background: #ffedd5;">ผู้ดูแลระบบ (Admin)</span>` 
-                    : `<span class="room-badge" style="color: #2563eb; background: #dbeafe;">ผู้ใช้งาน (User)</span>`;
+                    ? `<span class="room-badge" style="color: #ea580c; background: #ffedd5;">Admin</span>` 
+                    : `<span class="room-badge" style="color: #2563eb; background: #dbeafe;">User</span>`;
                 
-                const editBtn = `<button class="btn-edit-pass" onclick="editUser('${u.username}', '${u.name}', '${u.role}', '${u.password}')" title="แก้ไขข้อมูลผู้ใช้"><i class="fa-solid fa-user-pen"></i></button>`;
+                const editBtn = `<button class="btn-edit-pass" onclick="editUser('${u.username}', '${u.name}', '${u.role}', '${u.password}')" title="แก้ไขผู้ใช้"><i class="fa-solid fa-user-pen"></i></button>`;
                 
                 const delBtn = u.username !== currentUser.username 
                     ? `<button class="btn-delete" onclick="deleteUser('${u.username}')" title="ลบผู้ใช้"><i class="fa-solid fa-user-minus"></i></button>` 
