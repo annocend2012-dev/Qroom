@@ -9,31 +9,37 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (เอา Storage ออกแล้ว เพราะไม่ใช้รูปภาพ) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
+        /* สร้างตัวแปร CSS สำหรับทำระบบธีม */
         :root {
             --primary: #4318ff;
             --primary-hover: #3311db;
-            --text-dark: #1b2559;
-            --text-muted: #68769f;
             --danger: #ff5252;
             --success: #10b981;
             --warning: #f59e0b;
+
+            /* ค่าเริ่มต้น (จะถูกเปลี่ยนตามธีมที่เลือก) */
+            --bg-color: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --text-dark: #1b2559;
+            --text-muted: #68769f;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.5);
+            --input-bg: rgba(255, 255, 255, 0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Prompt', sans-serif; }
 
         body {
-            /* ธีมเริ่มต้น */
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background: var(--bg-color);
             color: var(--text-dark);
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
-            transition: background 0.5s ease;
+            transition: background 0.5s ease, color 0.3s ease;
         }
 
         /* Background Shapes */
@@ -51,11 +57,12 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--card-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--card-border);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            transition: background 0.3s, border 0.3s;
         }
 
         /* Navbar */
@@ -76,10 +83,9 @@
             color: white; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
-            border: 2px solid white;
+            border: 2px solid var(--card-border);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         /* Landing Page */
         .landing-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 75vh; text-align: center; padding: 20px; animation: fadeSwitch 0.6s ease-out forwards; }
@@ -92,27 +98,32 @@
         /* Layout Main */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 15px 40px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
         .card { border-radius: 20px; overflow: hidden; margin-bottom: 20px; transition: transform 0.4s ease, box-shadow 0.4s ease; }
-        .card-header { padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.6); }
-        .card-header h2 { font-size: 1.2rem; }
+        .card-header { padding: 20px; border-bottom: 1px solid var(--card-border); }
+        .card-header h2 { font-size: 1.2rem; color: var(--text-dark); }
         .card-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
 
         form { padding: 20px; }
         .form-group { margin-bottom: 15px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+        label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; color: var(--text-dark); }
         .required { color: var(--danger); }
         .input-with-icon { position: relative; }
         .input-with-icon i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
         
-        input, select { width: 100%; padding: 12px 15px 12px 42px; border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 12px; font-size: 0.9rem; outline: none; background: rgba(255, 255, 255, 0.5); color: var(--text-dark); transition: all 0.3s; }
-        input:focus, select:focus { background: rgba(255, 255, 255, 0.9); border-color: var(--primary); }
+        input, select { 
+            width: 100%; padding: 12px 15px 12px 42px; 
+            border: 2px solid var(--card-border); border-radius: 12px; font-size: 0.9rem; 
+            outline: none; background: var(--input-bg); color: var(--text-dark); 
+            transition: all 0.3s; 
+        }
+        input:focus, select:focus { background: var(--card-bg); border-color: var(--primary); }
 
         .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary) 0%, #868CFF 100%); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 8px 15px rgba(67, 24, 255, 0.25); transition: all 0.3s ease; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(67, 24, 255, 0.4); }
         .btn-success { background: linear-gradient(135deg, var(--success) 0%, #059669 100%); box-shadow: 0 8px 15px rgba(16, 185, 129, 0.25); }
 
-        .filter-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255, 255, 255, 0.4); border-bottom: 1px solid rgba(255, 255, 255, 0.6); flex-wrap: wrap; gap: 10px; }
-        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--input-bg); border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 10px; }
+        .filter-group { display: flex; align-items: center; gap: 8px; color: var(--text-dark);}
         .filter-group input[type="date"] { padding: 6px 10px; width: auto; }
         .filter-buttons { display: flex; gap: 8px; }
         .btn-filter-primary, .btn-filter-secondary { padding: 6px 12px; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s;}
@@ -121,14 +132,14 @@
         .btn-filter-secondary:hover { background-color: rgba(67, 24, 255, 0.2); }
 
         .table-responsive { overflow-x: auto; padding: 10px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; color: var(--text-dark); }
         th { color: var(--text-muted); font-size: 0.85rem; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.5); vertical-align: middle; }
+        td { padding: 15px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
 
-        tr.past-booking { opacity: 0.65; background: rgba(0, 0, 0, 0.02); }
+        tr.past-booking { opacity: 0.65; background: rgba(0, 0, 0, 0.05); }
         .time-badge { display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
         .room-badge { background: rgba(67, 24, 255, 0.1); color: var(--primary); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
-        .status-badge-done { background: #e2e8f0; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-right: 5px; }
+        .status-badge-done { background: var(--card-border); color: var(--text-muted); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; margin-right: 5px; }
         
         .btn-delete { background: rgba(255, 82, 82, 0.1); color: var(--danger); border: 1px solid rgba(255, 82, 82, 0.3); padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
         .btn-delete:hover { background: var(--danger); color: white; }
@@ -141,20 +152,26 @@
         .auth-card { width: 100%; max-width: 420px; }
         .auth-header { padding: 30px 20px 10px; text-align: center; }
         .auth-header h2 { color: var(--primary); margin-bottom: 10px; font-size: 1.5rem; }
-        .admin-note { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; }
+        .admin-note { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; background: var(--input-bg); padding: 10px; border-radius: 8px; }
         .btn-logout { background: rgba(255, 82, 82, 0.15); color: var(--danger); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: all 0.2s; }
         .btn-logout:hover { background: var(--danger); color: white; }
         .no-data { text-align: center; padding: 40px !important; color: var(--text-muted); }
 
-        /* ตัวเลือกธีม */
-        .theme-selector { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+        /* ตัวเลือกธีมใหม่ (รองรับสีพื้น และ Dark Mode) */
+        .theme-selector { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); 
+            gap: 15px; 
+            margin-top: 10px; 
+        }
         .theme-option { 
             width: 45px; height: 45px; border-radius: 50%; cursor: pointer; 
             border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: 0.3s;
+            margin: auto;
         }
         .theme-option:hover { transform: scale(1.1); }
-        .theme-option.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.2); }
+        .theme-option.active { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.3); }
 
         @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .filter-bar { flex-direction: column; align-items: stretch; } }
 
@@ -173,17 +190,15 @@
             <span>Qroom</span>
         </div>
         <div class="nav-profile hidden" id="userProfile">
-            <!-- ปุ่มจัดการระบบเฉพาะ Admin -->
             <button id="btnAdminNav" class="btn-filter-secondary hidden">
                 <i class="fa-solid fa-user-shield"></i> จัดการระบบ
             </button>
 
-            <!-- ปุ่มตั้งค่าโปรไฟล์ส่วนตัว -->
             <button id="btnProfileNav" class="btn-filter-secondary">
                 <i class="fa-solid fa-user-gear"></i> ตั้งค่าส่วนตัว
             </button>
 
-            <div class="avatar" id="navAvatar"><i class="fa-solid fa-user-astronaut"></i></div>
+            <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
             <span id="welcomeText" style="font-size: 0.9rem; margin-right: 5px;">ยินดีต้อนรับ</span>
             <button id="btnLogout" class="btn-logout" title="ออกจากระบบ">
                 <i class="fa-solid fa-right-from-bracket"></i>
@@ -325,12 +340,12 @@
         </section>
     </main>
 
-    <!-- 👤 4. หน้าตั้งค่าโปรไฟล์ส่วนตัว -->
+    <!-- 👤 4. หน้าตั้งค่าโปรไฟล์ส่วนตัว (ลบอัปโหลดรูปออก เหลือแต่ธีมและชื่อ) -->
     <main id="profileSection" class="container hidden" style="grid-template-columns: 1fr; max-width: 600px;">
         <section class="card glass-panel fade-in-up">
             <div class="card-header">
                 <h2><i class="fa-solid fa-id-card"></i> ตั้งค่าข้อมูลส่วนตัว</h2>
-                <p>ปรับแต่งโปรไฟล์และธีมระบบตามสไตล์ของคุณ</p>
+                <p>ปรับแต่งชื่อที่แสดงและธีมสีระบบตามสไตล์ของคุณ</p>
             </div>
             
             <form id="profileSettingForm">
@@ -343,18 +358,9 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>ลิงก์รูปโปรไฟล์ (URL)</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-link"></i>
-                        <input type="url" id="profileAvatar" placeholder="เช่น https://example.com/my-pic.jpg (เว้นว่างไว้เพื่อใช้ไอคอนเริ่มต้น)">
-                    </div>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">* รองรับลิงก์รูปภาพจากเว็บทั่วไป หรือ Facebook/Instagram</p>
-                </div>
-
-                <div class="form-group">
-                    <label>เลือกธีมพื้นหลัง</label>
+                    <label>เลือกธีมสี</label>
                     <div class="theme-selector" id="themeSelector">
-                        <!-- ธีมต่างๆ จะถูกสร้างผ่าน JavaScript -->
+                        <!-- ปุ่มสีต่างๆ จะถูกสร้างผ่าน JavaScript -->
                     </div>
                     <input type="hidden" id="profileTheme">
                 </div>
@@ -461,11 +467,10 @@
         const btnProfileNav = document.getElementById('btnProfileNav');
         const btnLogout = document.getElementById('btnLogout');
         
-        // Display texts & Images
+        // Display texts
         const landingNameText = document.getElementById('landingNameText');
         const userProfile = document.getElementById('userProfile');
         const welcomeText = document.getElementById('welcomeText');
-        const navAvatar = document.getElementById('navAvatar');
 
         // Forms & Inputs
         const loginForm = document.getElementById('loginForm');
@@ -481,13 +486,16 @@
         let allBookings = [];
         let allUsers = [];
 
-        // 🎨 รายการธีมสี
+        // 🎨 รายการธีมสีแบบใหม่ (มีขาว/ดำ และสีอื่นๆ)
         const themes = {
-            'default': 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', // ม่วง-ฟ้า
-            'peach': 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)', // ชมพูพีช
-            'mint': 'linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)', // เขียวมิ้นต์
-            'sky': 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)', // ฟ้าคราม
-            'lemon': 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' // เหลือง-ส้ม
+            'default': { bg: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)', text: '#1b2559', textMuted: '#68769f', cardBg: 'rgba(255, 255, 255, 0.7)', border: 'rgba(255, 255, 255, 0.5)', inputBg: 'rgba(255, 255, 255, 0.5)', btnColor: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
+            'white': { bg: '#f3f4f6', text: '#1f2937', textMuted: '#6b7280', cardBg: '#ffffff', border: '#e5e7eb', inputBg: '#f9fafb', btnColor: '#ffffff' },
+            'black': { bg: '#121212', text: '#f3f4f6', textMuted: '#9ca3af', cardBg: 'rgba(30, 30, 30, 0.8)', border: 'rgba(255, 255, 255, 0.1)', inputBg: 'rgba(0, 0, 0, 0.5)', btnColor: '#121212' },
+            'blue': { bg: '#eff6ff', text: '#1e3a8a', textMuted: '#60a5fa', cardBg: '#dbeafe', border: '#bfdbfe', inputBg: '#eff6ff', btnColor: '#3b82f6' },
+            'red': { bg: '#fef2f2', text: '#7f1d1d', textMuted: '#f87171', cardBg: '#fee2e2', border: '#fecaca', inputBg: '#fef2f2', btnColor: '#ef4444' },
+            'green': { bg: '#f0fdf4', text: '#14532d', textMuted: '#4ade80', cardBg: '#dcfce3', border: '#bbf7d0', inputBg: '#f0fdf4', btnColor: '#10b981' },
+            'orange': { bg: '#fffbeb', text: '#78350f', textMuted: '#fbbf24', cardBg: '#fef3c7', border: '#fde68a', inputBg: '#fffbeb', btnColor: '#f59e0b' },
+            'pink': { bg: '#fdf2f8', text: '#831843', textMuted: '#f472b6', cardBg: '#fce7f3', border: '#fbcfe8', inputBg: '#fdf2f8', btnColor: '#ec4899' }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -500,13 +508,16 @@
         // 🎨 ฟังก์ชันจัดการ ธีม
         function setupThemeSelector() {
             const container = document.getElementById('themeSelector');
-            for (const [key, value] of Object.entries(themes)) {
-                const div = document.createElement('div');
-                div.className = 'theme-option';
-                div.style.background = value;
-                div.dataset.theme = key;
-                div.onclick = () => selectThemeOption(key);
-                container.appendChild(div);
+            for (const [key, themeData] of Object.entries(themes)) {
+                const btn = document.createElement('div');
+                btn.className = 'theme-option';
+                btn.style.background = themeData.btnColor; // สีที่จะโชว์บนปุ่มให้เลือก
+                if (key === 'white') btn.style.border = '2px solid #ccc'; // เพิ่มขอบให้สีขาว
+                
+                btn.dataset.theme = key;
+                btn.title = `ธีม ${key}`;
+                btn.onclick = () => selectThemeOption(key);
+                container.appendChild(btn);
             }
         }
 
@@ -516,20 +527,21 @@
             if(selected) selected.classList.add('active');
             
             document.getElementById('profileTheme').value = themeKey;
-            document.body.style.background = themes[themeKey]; // พรีวิวดูทันที
+            
+            // พรีวิวธีมทันที
+            applyThemeStyle(themeKey);
         }
 
-        function applyUserPreferences(user) {
-            // Apply Avatar
-            if (user.avatar && user.avatar.trim() !== "") {
-                navAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar">`;
-            } else {
-                navAvatar.innerHTML = `<i class="fa-solid fa-user-astronaut"></i>`;
-            }
-
-            // Apply Theme
-            const userTheme = user.theme || 'default';
-            document.body.style.background = themes[userTheme] || themes['default'];
+        function applyThemeStyle(themeKey) {
+            const theme = themes[themeKey] || themes['default'];
+            const root = document.documentElement;
+            
+            root.style.setProperty('--bg-color', theme.bg);
+            root.style.setProperty('--text-dark', theme.text);
+            root.style.setProperty('--text-muted', theme.textMuted);
+            root.style.setProperty('--card-bg', theme.cardBg);
+            root.style.setProperty('--card-border', theme.border);
+            root.style.setProperty('--input-bg', theme.inputBg);
         }
 
         // 🔄 ระบบนำทาง
@@ -564,28 +576,24 @@
             
             // นำข้อมูลปัจจุบันมาแสดงในฟอร์ม
             document.getElementById('profileName').value = currentUser.name || '';
-            document.getElementById('profileAvatar').value = currentUser.avatar || '';
             selectThemeOption(currentUser.theme || 'default');
         });
 
-        // 👤 อัปเดตโปรไฟล์ส่วนตัว
+        // 👤 อัปเดตโปรไฟล์ส่วนตัว (เฉพาะชื่อและธีม)
         profileSettingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newName = document.getElementById('profileName').value.trim();
-            const newAvatar = document.getElementById('profileAvatar').value.trim();
             const newTheme = document.getElementById('profileTheme').value;
 
             try {
-                // บันทึกเข้า Firestore
+                // บันทึกข้อมูลเข้า Firestore
                 await db.collection('users').doc(currentUser.username).update({
                     name: newName,
-                    avatar: newAvatar,
                     theme: newTheme
                 });
                 
-                // อัปเดต Session
+                // อัปเดต Session ภายในระบบ
                 currentUser.name = newName;
-                currentUser.avatar = newAvatar;
                 currentUser.theme = newTheme;
                 localStorage.setItem('qroom_session', JSON.stringify(currentUser));
 
@@ -593,12 +601,13 @@
                 welcomeText.textContent = currentUser.name;
                 landingNameText.textContent = `คุณ ${currentUser.name}`;
                 if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
-                applyUserPreferences(currentUser);
+                
+                applyThemeStyle(currentUser.theme); // เซ็ตธีมให้แน่นอนอีกครั้ง
 
                 Swal.fire({
                     icon: 'success',
                     title: 'บันทึกโปรไฟล์สำเร็จ!',
-                    text: 'ข้อมูลส่วนตัวและธีมของคุณถูกอัปเดตเรียบร้อยแล้ว',
+                    text: 'ชื่อและธีมสีของคุณถูกอัปเดตเรียบร้อยแล้ว',
                     timer: 2000,
                     showConfirmButton: false
                 });
@@ -607,7 +616,6 @@
                 Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
             }
         });
-
 
         // 🔐 เข้าสู่ระบบ
         loginForm.addEventListener('submit', async (e) => {
@@ -631,7 +639,7 @@
 
         btnLogout.addEventListener('click', () => {
             localStorage.removeItem('qroom_session');
-            document.body.style.background = themes['default']; // กลับไปธีมเดิม
+            applyThemeStyle('default'); // กลับไปธีมเดิม
             checkAuth();
         });
 
@@ -648,8 +656,8 @@
                 landingNameText.textContent = `คุณ ${currentUser.name}`;
                 if(document.getElementById('name')) document.getElementById('name').value = currentUser.name;
                 
-                // ใช้การตั้งค่าโปรไฟล์/ธีม
-                applyUserPreferences(currentUser);
+                // ใช้การตั้งค่าธีมส่วนตัว
+                applyThemeStyle(currentUser.theme || 'default');
                 
                 if (currentUser.role === 'admin') {
                     btnAdminNav.classList.remove('hidden');
@@ -878,7 +886,7 @@
                     return;
                 }
 
-                await userRef.set({ username, password, name, role, theme: 'default', avatar: '' });
+                await userRef.set({ username, password, name, role, theme: 'default' });
                 Swal.fire({ icon: 'success', title: 'สร้างบัญชีสำเร็จ', timer: 1500, showConfirmButton: false });
                 addUserForm.reset();
             } catch (err) {
